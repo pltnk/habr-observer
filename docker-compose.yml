@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: observer-db
+    command: --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${OBSERVER_MONGO_USER:-default}
+      MONGO_INITDB_ROOT_PASSWORD: ${OBSERVER_MONGO_PASS:-default}
+    env_file: .env
+    volumes:
+      - "~/.habr_observer:/data/db/:rw"
+    restart: always
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
+
+  observer:
+    build:
+      context: ./observer
+      dockerfile: Dockerfile
+      args:
+        SL_PORT: ${OBSERVER_SL_PORT:-8501}
+    container_name: observer
+    env_file: .env
+    ports:
+      - ${OBSERVER_SL_PORT:-8501}:${OBSERVER_SL_PORT:-8501}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "1"
