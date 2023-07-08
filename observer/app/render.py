@@ -16,20 +16,6 @@ def render_header() -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.caption(
-        """
-        <div style='text-align: center'>
-        <a href='https://pltnk.dev' target='_blank' style='text-decoration: none; color: inherit;'>
-        😎 Автор pltnk.dev
-        </a>
-        &emsp;&emsp;
-        <a href='https://github.com/pltnk/habr-observer' target='_blank' style='text-decoration: none; color: inherit;'>
-        🍝 Код на GitHub
-        </a>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 def render_article(article: Article, visible_theses: int = 3) -> None:
@@ -147,6 +133,20 @@ def render_footer() -> None:
     st.caption(
         """
         <div style='text-align: center'>
+        <a href='https://pltnk.dev' target='_blank' style='text-decoration: none; color: inherit;'>
+        😎 Автор pltnk.dev
+        </a>
+        &emsp;&emsp;
+        <a href='https://github.com/pltnk/habr-observer' target='_blank' style='text-decoration: none; color: inherit;'>
+        🍝 Код на GitHub
+        </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        """
+        <div style='text-align: center'>
         В приложении используются материалы сайта 
         <a href='https://habr.com' target='_blank' style='text-decoration: none; color: inherit;'>
         habr.com</a>, краткие пересказы которых получены с помощью сервиса
@@ -156,7 +156,6 @@ def render_footer() -> None:
         """,
         unsafe_allow_html=True,
     )
-    st.write("\n")
     st.markdown(
         """
         <div style='position: fixed; bottom: 0px; right: 4px; font-size: xx-large;'>
