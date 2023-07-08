@@ -14,5 +14,12 @@
 - Выполнить `docker compose up -d` из корня склонированного репозитория
 - Первоначальный сбор статей может занять несколько минут, так как соблюдается rate limit для API сервиса 300.ya.ru
 
+#### Сделано с помощью
+- [Streamlit](https://github.com/streamlit/streamlit)
+- [HTTPX](https://github.com/encode/httpx)
+- [Beautiful Soup 4](https://www.crummy.com/software/BeautifulSoup/)
+- [lxml](https://github.com/lxml/lxml)
+- [Motor](https://github.com/mongodb/motor)
+
 #### Лицензия
 Проект находится под лицензией [MIT](https://choosealicense.com/licenses/mit/) — подробности в файле [LICENSE](LICENSE).
