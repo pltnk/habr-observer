@@ -11,7 +11,7 @@ def render_header() -> None:
         """
         <div id='top' style='text-align: center'>
         <h1>🧐<br>habr.observer</h1>
-        <h2>Краткий пересказ лучших статей с Хабра от YandexGPT</h2>
+        <h2>Краткий пересказ лучших статей с Хабра от нейросети YandexGPT</h2>
         </div>
         """,
         unsafe_allow_html=True,
