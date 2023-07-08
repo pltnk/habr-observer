@@ -8,8 +8,8 @@ st.set_page_config(
     menu_items={
         "Get help": None,
         "Report a Bug": "https://github.com/pltnk/habr-observer/issues",
-        "About": "Author: [pltnk.dev](https://pltnk.dev) ✧˚₊‧⋆ "
-        "Code: [github.com/pltnk/habr-observer](https://github.com/pltnk/habr-observer)",
+        "About": "Author: [pltnk.dev](https://pltnk.dev) ✧˚₊‧⋆‧ "
+        "Source: [habr-observer](https://github.com/pltnk/habr-observer)",
     },
 )
 
