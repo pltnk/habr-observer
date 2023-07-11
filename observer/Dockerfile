@@ -4,6 +4,7 @@ ENV PYTHONPATH "/opt/observer:$PYTHONPATH"
 ENV PYTHONUNBUFFERED true
 COPY requirements.txt /opt/observer/requirements.txt
 RUN pip install --no-cache-dir --ignore-installed -r requirements.txt
+COPY ./app/static/* /usr/local/lib/python3.9/site-packages/streamlit/static/
 COPY . /opt/observer
 RUN apt update && apt install -y curl \
     && rm -rf /var/lib/apt/lists/*
