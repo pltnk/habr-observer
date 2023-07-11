@@ -10,7 +10,9 @@ def render_header() -> None:
     st.markdown(
         """
         <div id='top' style='text-align: center'>
-        <h1>🧐<br>habr.observer</h1>
+        <p id='#top'></p>
+        <br>
+        <h1>🧐<br>Обозреватель Хабра</h1>
         <h2>Краткий пересказ лучших статей с Хабра от нейросети YandexGPT</h2>
         </div>
         """,
@@ -158,8 +160,8 @@ def render_footer() -> None:
     )
     st.markdown(
         """
-        <div style='position: fixed; bottom: 0px; right: 4px; font-size: xx-large;'>
-        <a href='#habr-observer' style='text-decoration: none;'>⬆️</a>
+        <div style='position: fixed; bottom: 0px; right: 5px; font-size: xx-large;'>
+        <a href='#top' style='text-decoration: none;'>⬆️</a>
         </div>
         """,
         unsafe_allow_html=True,
