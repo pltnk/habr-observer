@@ -55,7 +55,7 @@ def parse_summary_content(content: bytes) -> List[str]:
             "class": lambda c: isinstance(c, str) and c.startswith("content-theses")
         },
     )
-    return [i.text for i in tag.find_all("li")]
+    return [i.text.strip("• \n") for i in tag.find_all("li")]
 
 
 async def get_summary(
