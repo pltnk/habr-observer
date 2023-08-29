@@ -24,8 +24,7 @@ def render_article(article: Article, visible_theses: int = 3) -> None:
     with st.container():
         st.subheader(
             article.title,
-            help=f"Автор: [{article.author}](https://habr.com/ru/users/{article.author}/), "
-            f"дата публикации: {article.pub_date}",
+            help=f"Дата публикации: {article.pub_date}",
             anchor=False,
         )
         st.markdown(
