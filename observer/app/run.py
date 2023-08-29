@@ -41,5 +41,8 @@ def run_app():
     render_header()
     with st.spinner(text="Читаю статьи..."):
         feeds = get_feeds_sync()
-    render_tabs(feeds)
+    if feeds:
+        render_tabs(feeds)
+    else:
+        st.info("Лента пересобирается, загляните позже 😉")
     render_footer()
