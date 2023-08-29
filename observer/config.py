@@ -1,11 +1,11 @@
 import os
 
 OBSERVER_FEEDS = {
-    "Сутки": "https://habr.com/ru/rss/best/daily/?fl=ru",
-    "Неделя": "https://habr.com/ru/rss/best/weekly/?fl=ru",
-    "Месяц": "https://habr.com/ru/rss/best/monthly/?fl=ru",
-    "Год": "https://habr.com/ru/rss/best/yearly/?fl=ru",
-    "Всё время": "https://habr.com/ru/rss/best/alltime/?fl=ru",
+    "Сутки": "https://habr.com/ru/rss/articles/top/daily/?fl=ru",
+    "Неделя": "https://habr.com/ru/rss/articles/top/weekly/?fl=ru",
+    "Месяц": "https://habr.com/ru/rss/articles/top/monthly/?fl=ru",
+    "Год": "https://habr.com/ru/rss/articles/top/yearly/?fl=ru",
+    "Всё время": "https://habr.com/ru/rss/articles/top/alltime/?fl=ru",
 }
 
 OBSERVER_MONGO_USER = os.environ.get("OBSERVER_MONGO_USER", "default")
