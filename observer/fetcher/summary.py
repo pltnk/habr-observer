@@ -50,10 +50,8 @@ async def get_summary_content(summary_url: str) -> bytes:
 def parse_summary_content(content: bytes) -> List[str]:
     parsed = BeautifulSoup(content, features="lxml")
     tag = parsed.find(
-        "div",
-        attrs={
-            "class": lambda c: isinstance(c, str) and c.startswith("content-theses")
-        },
+        "ul",
+        attrs={"class": lambda c: isinstance(c, str) and c.startswith("theses-list")},
     )
     return [i.text.strip("• \n") for i in tag.find_all("li")]
 
