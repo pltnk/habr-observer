@@ -40,20 +40,33 @@ async def get_summary_url(
     return parsed["sharing_url"]
 
 
-async def get_summary_content(summary_url: str) -> bytes:
+async def get_summary_content_api(summary_url: str) -> List[str]:
+    token = summary_url.rsplit("/", 1)[-1]
+    async with httpx.AsyncClient(timeout=10) as client:
+        res = await client.post("https://300.ya.ru/api/sharing", json={"token": token})
+    res.raise_for_status()
+    parsed = res.json()
+    return [i["content"] for i in parsed["thesis"]]
+
+
+async def get_summary_content_noapi(summary_url: str) -> List[str]:
     async with httpx.AsyncClient(timeout=10) as client:
         res = await client.get(summary_url)
     res.raise_for_status()
-    return res.content
-
-
-def parse_summary_content(content: bytes) -> List[str]:
-    parsed = BeautifulSoup(content, features="lxml")
+    parsed = BeautifulSoup(res.content, features="lxml")
     tag = parsed.find(
         "ul",
         attrs={"class": lambda c: isinstance(c, str) and c.startswith("theses-list")},
     )
     return [i.text.strip("• \n") for i in tag.find_all("li")]
+
+
+async def get_summary_content(summary_url: str) -> List[str]:
+    try:
+        content = await get_summary_content_api(summary_url=summary_url)
+    except Exception:
+        content = await get_summary_content_noapi(summary_url=summary_url)
+    return content
 
 
 async def get_summary(
@@ -69,6 +82,5 @@ async def get_summary(
                 "Статья слишком длинная, нейросети пока не умеют пересказывать такие статьи 😔"
             ],
         )
-    raw_content = await get_summary_content(summary_url=summary_url)
-    content = parse_summary_content(raw_content)
+    content = await get_summary_content(summary_url=summary_url)
     return Summary(url=summary_url, content=content)
