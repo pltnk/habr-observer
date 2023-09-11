@@ -65,7 +65,7 @@ class FeedUpdater:
             lock=self._throttle_lock,
         )
         title = tag.find("title").text or "Без названия"
-        pub_date = datetime.datetime.strptime(tag.find("pubdate").text, DT_FORMAT)
+        pub_date = datetime.datetime.strptime(tag.find("pubDate").text, DT_FORMAT)
         author = tag.find("dc:creator").text
         return Article(
             _id=url, title=title, pub_date=pub_date, author=author, summary=summary
