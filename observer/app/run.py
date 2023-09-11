@@ -11,7 +11,7 @@ from config import (
     OBSERVER_FEED_CACHE_TTL,
 )
 from repository import MongoAsyncRepository
-from .render import render_header, render_tabs, render_footer
+from .render import render_header, render_toggle, render_tabs, render_footer
 
 
 @st.cache_resource
@@ -42,7 +42,8 @@ def run_app():
     with st.spinner(text="Читаю статьи..."):
         feeds = get_feeds_sync()
     if feeds:
-        render_tabs(feeds)
+        collapse_summaries = render_toggle()
+        render_tabs(feeds, collapse_summaries=collapse_summaries)
     else:
         st.info("Лента пересобирается, загляните позже 😉")
     render_footer()
