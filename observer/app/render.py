@@ -20,23 +20,46 @@ def render_header() -> None:
     )
 
 
-def render_article(article: Article, visible_theses: int = 3) -> None:
+def render_toggle() -> bool:
+    st.write(
+        """
+        <style>
+        label[data-baseweb="checkbox"] {
+        justify-content: center;
+        align-items: center;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+    return st.toggle(
+        label="Сворачивать пересказы",
+        value=True,
+        key="collapse_summaries",
+        help="Отключите, чтобы показывать пересказы целиком, не сворачивая их",
+    )
+
+
+def render_theses(theses: Iterable[str]) -> None:
+    st.markdown("\n".join("* " + i for i in theses))
+
+
+def render_article(
+    article: Article, collapse_summary: bool = True, visible_theses: int = 3
+) -> None:
     with st.container():
         st.subheader(
             article.title,
             help=f"Дата публикации: {article.pub_date}",
             anchor=False,
         )
-        st.markdown(
-            "\n".join("* " + i for i in article.summary.content[:visible_theses])
-        )
-        if len(article.summary.content) > visible_theses:
-            with st.expander(label="Продолжение пересказа"):
-                st.markdown(
-                    "\n".join(
-                        "* " + i for i in article.summary.content[visible_theses:]
-                    )
-                )
+        if collapse_summary:
+            render_theses(article.summary.content[:visible_theses])
+            if len(article.summary.content) > visible_theses:
+                with st.expander(label="Продолжение пересказа"):
+                    render_theses(article.summary.content[visible_theses:])
+        else:
+            render_theses(article.summary.content)
         st.caption(
             f"""
             <div style='text-align: center'>
@@ -55,14 +78,16 @@ def render_article(article: Article, visible_theses: int = 3) -> None:
 
 
 def render_tab(
-    tab: st.delta_generator.DeltaGenerator, articles: Iterable[Article]
+    tab: st.delta_generator.DeltaGenerator,
+    articles: Iterable[Article],
+    collapse_summaries: bool = True,
 ) -> None:
     with tab:
         for a in articles:
-            render_article(article=a)
+            render_article(article=a, collapse_summary=collapse_summaries)
 
 
-def render_tabs(feeds: Iterable[Feed]) -> None:
+def render_tabs(feeds: Iterable[Feed], collapse_summaries: bool = True) -> None:
     st.write(
         """
         <style>
@@ -76,7 +101,9 @@ def render_tabs(feeds: Iterable[Feed]) -> None:
     )
     tabs = st.tabs([feed.name for feed in feeds])
     for tab, feed in zip(tabs, feeds):
-        render_tab(tab=tab, articles=feed.articles)
+        render_tab(
+            tab=tab, articles=feed.articles, collapse_summaries=collapse_summaries
+        )
 
     # see for an explanation of the below code:
     # https://discuss.streamlit.io/t/bug-with-st-tabs-glitches-for-1-frame-while-rendering/33497/12

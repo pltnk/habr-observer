@@ -26,13 +26,13 @@ services:
         max-size: "10m"
         max-file: "1"
 
-  observer:
+  app:
     build:
       context: ./observer
       dockerfile: Dockerfile
       args:
         SL_PORT: ${OBSERVER_SL_PORT:-8501}
-    container_name: observer
+    container_name: observer-app
     env_file: .env
     ports:
       - ${OBSERVER_SL_PORT:-8501}:${OBSERVER_SL_PORT:-8501}

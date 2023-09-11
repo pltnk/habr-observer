@@ -1,6 +1,5 @@
 import asyncio
 import datetime
-import re
 from typing import Dict, Optional, Iterable
 
 import httpx
@@ -12,7 +11,6 @@ from repository import AsyncRepository
 from .summary import get_summary
 
 DT_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
-CDATA_REGEXP = re.compile("<!\[CDATA\[(.*)\]\]>")
 
 
 class FeedUpdater:
@@ -38,7 +36,7 @@ class FeedUpdater:
         async with httpx.AsyncClient(timeout=10) as client:
             res = await client.get(self._url)
         res.raise_for_status()
-        self._parsed = BeautifulSoup(res.content, "lxml")
+        self._parsed = BeautifulSoup(res.content, features="xml")
 
     async def _filter_articles(self) -> None:
         self._article_urls = [i.text for i in self._parsed.find_all("guid")]
@@ -66,12 +64,8 @@ class FeedUpdater:
             auth_token=self._summary_auth_token,
             lock=self._throttle_lock,
         )
-        match = CDATA_REGEXP.match(tag.find("title").text)
-        if match:
-            title = match.group(1)
-        else:
-            title = "Без названия"
-        pub_date = datetime.datetime.strptime(tag.find("pubdate").text, DT_FORMAT)
+        title = tag.find("title").text or "Без названия"
+        pub_date = datetime.datetime.strptime(tag.find("pubDate").text, DT_FORMAT)
         author = tag.find("dc:creator").text
         return Article(
             _id=url, title=title, pub_date=pub_date, author=author, summary=summary
