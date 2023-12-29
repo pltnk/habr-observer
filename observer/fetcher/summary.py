@@ -56,9 +56,9 @@ async def get_summary_content_noapi(summary_url: str) -> List[str]:
     parsed = BeautifulSoup(res.content, features="lxml")
     tag = parsed.find(
         "ul",
-        attrs={"class": lambda c: isinstance(c, str) and c.startswith("theses-list")},
+        attrs={"class": lambda c: isinstance(c, str) and c.startswith("theses")},
     )
-    return [i.text.strip("• \n") for i in tag.find_all("li")]
+    return [i.get_text(strip=True).strip("• \n") for i in tag.find_all("li")]
 
 
 async def get_summary_content(summary_url: str) -> List[str]:
