@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<channel>
+		<title>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</title>
+		<link>https://habr.com/ru/articles/top/alltime/</link>
+		<description>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</description>
+		<language>ru</language>
+		<managingEditor>
+			<a
+                href="/cdn-cgi/l/email-protection"
+                class="__cf_email__"
+                data-cfemail="ceabaaa7baa1bc8ea6afacbce0ada1a3"
+            >[email&#160;protected]</a>
+		</managingEditor>
+		<generator>habr.com</generator>
+		<pubDate>Sat, 09 Aug 2025 10:17:43 GMT</pubDate>
+		<image>
+			<link>https://habr.com/ru/</link>
+			<url
+            >https://habrastorage.org/webt/ym/el/wk/ymelwk3zy1gawz4nkejl_-ammtc.png</url>
+			<title>Хабр</title>
+		</image>
+		<item>
+			<title>
+				<![CDATA[[Перевод] Делаем приватный монитор из старого LCD монитора]]>
+			</title>
+			<guid isPermaLink="true">https://habr.com/ru/articles/133473/</guid>
+			<link
+            >https://habr.com/ru/articles/133473/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=133473</link>
+			<description>
+				<![CDATA[<img src="https://habrastorage.org/storage1/cc971216/3b86eb6d/dfa8282f/8ccb8fa5.jpeg"/><br/><br/>
+Вы наконец-то можете сделать кое-что со своим старым LCD монитором, который завалялся у Вас в гараже. Превратите его в шпионский монитор! Для всех вокруг он будет выглядеть просто белым экраном, но не для Вас, потому что у Вас будут специальные «волшебные» очки.<br/><br/>
+Всё что Вам нужно – это пара старых очков, нож для бумаги и растворитель для краски.<br/><br/><a href="https://habr.com/ru/articles/133473/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=133473#habracut">Читать дальше &rarr;</a>]]>
+			</description>
+			<pubDate>Sun, 27 Nov 2011 19:21:13 GMT</pubDate>
+			<dc:creator>
+				<![CDATA[kfedorov]]>
+			</dc:creator>
+			<category>агент 007</category>
+			<category>шпионские штучки</category>
+			<category>монитор</category>
+			<category>очки</category>
+		</item>
+		<item>
+			<title>
+				<![CDATA[Самый беззащитный — уже не Сапсан. Всё оказалось куда хуже…]]>
+			</title>
+			<guid isPermaLink="true">https://habr.com/ru/articles/536750/</guid>
+			<link
+            >https://habr.com/ru/articles/536750/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=536750</link>
+			<description>
+				<![CDATA[<b>{UPD 10.02.2021}</b> Евгений Чаркин дал интервью на эту тему <a href="https://gudok.ru/newspaper/?ID=1552569" rel="nofollow noopener noreferrer">gudok.ru/newspaper/?ID=1552569</a><br>
+Под катом мои комментарии на некоторые тезисы. <br><b>{/UPD}</b><br><br>
+Больше года назад хабравчанин <a href="https://habr.com/ru/users/keklick1337/" class="user_link">keklick1337</a> опубликовал свой единственный пост <a href="https://habr.com/ru/post/476034/">«Самый беззащитный — это Сапсан»</a> в котором рассказывает как он без серьёзных ухищрений получил доступ ко внутренней сети РЖД через WiFi Сапсана.<br><br><blockquote>В ОАО «РЖД» <a href="https://ria.ru/20191121/1561354449.html" rel="nofollow noopener noreferrer">прокомментировали результаты</a> этого расследования. «Есть результаты проверки. Почему удалось взломать? Наверное, потому, что злоумышленник. Наверное, из-за этого… Ну, он из „фана“. Юный натуралист. Там уязвимостей, которые бы влияли на утечку каких-то критических данных, нет. Мультимедийный портал „Сапсанов“ функционирует как положено и не нуждается в доработке», — заявил Евгений Чаркин.</blockquote><br>
+То есть вместо того, чтобы выразить благодарность за обнаруженную уязвимость, автора обозвали «злоумышленником» и «Юным натуралистом».<br><br>
+К сожалению, но специалисты РЖД, начиная с директора по информационным технологиям, отнеслись к статье очень пренебрежительно, проигнорировав важное указание автора:<br><blockquote>Также оттуда в сеть РЖД есть впн. Если захотите — найдёте её там сами.</blockquote><br>
+И вот, год спустя я попал в сеть РЖД даже не садясь в Сапсан.<br><br><br><img src="https://habrastorage.org/webt/wv/4g/gi/wv4ggiithe9lo-m0trwqxh-yesw.png"><br><i>Видимо, только этот котэ добросовестно охраняет вокзал.</i><br><br>
+Как именно я попал в сеть РЖД с пруфами, чего не сделал директор по информационным технологиям ОАО «РЖД» Чаркин Евгений Игоревич и возможные последствия — под катом.<br><a href="https://habr.com/ru/articles/536750/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=536750#habracut">Читать дальше &rarr;</a>]]>
+			</description>
+			<pubDate>Wed, 13 Jan 2021 05:51:41 GMT</pubDate>
+			<dc:creator>
+				<![CDATA[LMonoceros]]>
+			</dc:creator>
+			<category>
+				<![CDATA[РЖД]]>
+			</category>
+			<category>
+				<![CDATA[Взлом]]>
+			</category>
+			<category>
+				<![CDATA[Анализ]]>
+			</category>
+			<category>
+				<![CDATA[Пентест]]>
+			</category>
+			<category>
+				<![CDATA[игнорирование блогов]]>
+			</category>
+			<category>
+				<![CDATA[bug bounty]]>
+			</category>
+			<category>
+				<![CDATA[антитеррор]]>
+			</category>
+			<category>
+				<![CDATA[антитерроризм]]>
+			</category>
+			<category>
+				<![CDATA[mikrotik]]>
+			</category>
+			<category>
+				<![CDATA[видеонаблюдение]]>
+			</category>
+		</item>
+		<item>
+			<title>
+				<![CDATA[Были получены исходники 3300 глобальных интернет-проектов]]>
+			</title>
+			<guid isPermaLink="true">https://habr.com/ru/articles/70330/</guid>
+			<link
+            >https://habr.com/ru/articles/70330/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=70330</link>
+			<description>
+				<![CDATA[<img src="https://habrastorage.org/getpro/habr/post_images/69a/136/d34/69a136d34470513af948c302f060846c.jpg" align="right"/>Пару месяцев назад нами (<a href="http://twocomrades.ru">2Товарища</a> и <a href="http://isaykin.ru">Антон Исайкин</a>) была обнаружена уязвимость, присущая в основном большим интернет-проектам (вроде Рамблера, Мейла, Яндекса, Оперы и пр.). Удалось получить доступ к файловым структурам известнейших сайтов (в общей сложности 3320 сайтов) и в ряде случаев их полные исходные коды.<br/><a href="https://habr.com/ru/articles/70330/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=70330#habracut">Читать дальше &rarr;</a>]]>
+			</description>
+			<pubDate>Wed, 23 Sep 2009 09:17:27 GMT</pubDate>
+			<dc:creator>
+				<![CDATA[mobilz]]>
+			</dc:creator>
+			<category>
+				<![CDATA[svn]]>
+			</category>
+			<category>
+				<![CDATA[исходный код]]>
+			</category>
+			<category>
+				<![CDATA[mail.ru]]>
+			</category>
+			<category>
+				<![CDATA[rambler.ru]]>
+			</category>
+			<category>
+				<![CDATA[yandex.ru]]>
+			</category>
+			<category>
+				<![CDATA[opera.com]]>
+			</category>
+			<category>
+				<![CDATA[2товарища]]>
+			</category>
+			<category>
+				<![CDATA[twocomrades.ru]]>
+			</category>
+		</item>
+	</channel>
+</rss>

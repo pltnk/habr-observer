@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<channel>
+		<title>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</title>
+		<link>https://habr.com/ru/articles/top/alltime/</link>
+		<description>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</description>
+		<language>ru</language>
+		<managingEditor>
+			<a
+                href="/cdn-cgi/l/email-protection"
+                class="__cf_email__"
+                data-cfemail="ceabaaa7baa1bc8ea6afacbce0ada1a3"
+            >[email&#160;protected]</a>
+		</managingEditor>
+		<generator>habr.com</generator>
+		<pubDate>Sat, 09 Aug 2025 10:17:43 GMT</pubDate>
+		<image>
+			<link>https://habr.com/ru/</link>
+			<url
+            >https://habrastorage.org/webt/ym/el/wk/ymelwk3zy1gawz4nkejl_-ammtc.png</url>
+			<title>Хабр</title>
+		</image>
+		<item>
+			<title>
+				<![CDATA[[Перевод] Делаем приватный монитор из старого LCD монитора]]>
+			</title>
+			<guid isPermaLink="true">https://habr.com/ru/articles/133473/</guid>
+			<link
+            >https://habr.com/ru/articles/133473/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=133473</link>
+			<description>
+				<![CDATA[<img src="https://habrastorage.org/storage1/cc971216/3b86eb6d/dfa8282f/8ccb8fa5.jpeg"/><br/><br/>
+Вы наконец-то можете сделать кое-что со своим старым LCD монитором, который завалялся у Вас в гараже. Превратите его в шпионский монитор! Для всех вокруг он будет выглядеть просто белым экраном, но не для Вас, потому что у Вас будут специальные «волшебные» очки.<br/><br/>
+Всё что Вам нужно – это пара старых очков, нож для бумаги и растворитель для краски.<br/><br/><a href="https://habr.com/ru/articles/133473/?utm_source=habrahabr&amp;utm_medium=rss&amp;utm_campaign=133473#habracut">Читать дальше &rarr;</a>]]>
+			</description>
+			<pubDate>THIS IS A BAD DATE</pubDate>
+			<dc:creator>
+				<![CDATA[kfedorov]]>
+			</dc:creator>
+			<category>агент 007</category>
+			<category>шпионские штучки</category>
+			<category>монитор</category>
+			<category>очки</category>
+		</item>
+	</channel>
+</rss>

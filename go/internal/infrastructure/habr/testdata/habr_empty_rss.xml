@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+	<channel>
+		<title>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</title>
+		<link>https://habr.com/ru/articles/top/alltime/</link>
+		<description>
+			<![CDATA[Лучшие публикации за всё время ]]>
+		</description>
+		<language>ru</language>
+		<managingEditor>
+			<a
+                href="/cdn-cgi/l/email-protection"
+                class="__cf_email__"
+                data-cfemail="ceabaaa7baa1bc8ea6afacbce0ada1a3"
+            >[email&#160;protected]</a>
+		</managingEditor>
+		<generator>habr.com</generator>
+		<pubDate>Sat, 09 Aug 2025 10:17:43 GMT</pubDate>
+		<image>
+			<link>https://habr.com/ru/</link>
+			<url
+            >https://habrastorage.org/webt/ym/el/wk/ymelwk3zy1gawz4nkejl_-ammtc.png</url>
+			<title>Хабр</title>
+		</image>
+	</channel>
+</rss>
