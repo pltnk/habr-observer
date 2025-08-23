@@ -55,7 +55,7 @@ func parseXML(data []byte) ([]*entities.Article, error) {
 
 	articles := make([]*entities.Article, 0, nItems)
 	for _, it := range parsed.Channel.Items {
-		t, err := parseDate(it.PubDate)
+		pd, err := parseDate(it.PubDate)
 		if err != nil {
 			return nil, fmt.Errorf("parsing XML: %w", err)
 		}
@@ -63,7 +63,7 @@ func parseXML(data []byte) ([]*entities.Article, error) {
 		articles = append(articles, &entities.Article{
 			ID:      strings.TrimSpace(it.GUID),
 			Title:   strings.TrimSpace(it.Title),
-			PubDate: t,
+			PubDate: pd,
 			Author:  strings.TrimSpace(it.Creator),
 		})
 	}
