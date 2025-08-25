@@ -37,8 +37,13 @@ func TestNewSummaryURL_Success(t *testing.T) {
 		},
 		{
 			name:  "mixed_case_host_and_port",
-			raw:   "https://300.YA.RU:443/ZdADIfJG",
+			raw:   "HTTPS://300.YA.ru:443/ZdADIfJG",
 			token: "ZdADIfJG",
+		},
+		{
+			name:  "extra_whitespace",
+			raw:   "  \n\t https://300.ya.ru/5SuCnKaU \t ",
+			token: "5SuCnKaU",
 		},
 	}
 
@@ -51,7 +56,7 @@ func TestNewSummaryURL_Success(t *testing.T) {
 				t.Fatalf("NewSummaryURL(%q): unexpected error: %v", tc.raw, err)
 			}
 
-			wantURL, err := url.Parse(tc.raw)
+			wantURL, err := url.Parse(strings.TrimSpace(tc.raw))
 			if err != nil {
 				t.Fatalf("url.Parse(%q) failed in test: %v", tc.raw, err)
 			}
