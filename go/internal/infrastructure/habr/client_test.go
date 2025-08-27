@@ -154,7 +154,7 @@ func TestGetArticles_Errors(t *testing.T) {
 			rt: RT(func(r *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
-					Status:     http.StatusText(http.StatusInternalServerError),
+					Status:     fmt.Sprintf("%d %s", http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)),
 					Body:       io.NopCloser(strings.NewReader("error")),
 					Request:    r,
 				}, nil
@@ -202,7 +202,7 @@ func TestGetArticles_Errors(t *testing.T) {
 				t.Fatalf("GetArticles: got non-nil articles %+v", got)
 			}
 			if !strings.Contains(err.Error(), "getting articles for") || !strings.Contains(err.Error(), tc.err) {
-				t.Fatalf("GetArticles: error does not contain expected text: %q", err)
+				t.Fatalf("GetArticles: error %q does not contain expected text %q", err, tc.err)
 			}
 		})
 	}

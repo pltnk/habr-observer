@@ -51,7 +51,7 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("getting XML from %q: HTTP %d %s", url, resp.StatusCode, resp.Status)
+		return nil, fmt.Errorf("getting XML from %q: HTTP %s", url, resp.Status)
 	}
 
 	data, err := io.ReadAll(resp.Body)
