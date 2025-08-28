@@ -155,11 +155,11 @@ func TestGetArticles_Errors(t *testing.T) {
 				return &http.Response{
 					StatusCode: http.StatusInternalServerError,
 					Status:     fmt.Sprintf("%d %s", http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)),
-					Body:       io.NopCloser(strings.NewReader("error")),
+					Body:       io.NopCloser(strings.NewReader("error body")),
 					Request:    r,
 				}, nil
 			}),
-			err: fmt.Sprintf("HTTP %d %s", http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)),
+			err: fmt.Sprintf("HTTP %d %s: \"error body\"", http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError)),
 		},
 		{
 			name: "read_error",

@@ -1,6 +1,7 @@
 package habr
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"habr-observer/internal/entities"
@@ -11,6 +12,7 @@ import (
 )
 
 const defaultTimeout = 10 * time.Second
+const maxErrSnippet = 2048 // 2KiB
 
 type Client struct {
 	c    *http.Client
@@ -50,8 +52,10 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 		return nil, fmt.Errorf("getting XML from %q: %w", url, err)
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("getting XML from %q: HTTP %s", url, resp.Status)
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippet))
+		return nil, fmt.Errorf("getting XML from %q: HTTP %s: %q", url, resp.Status, string(bytes.TrimSpace(body)))
 	}
 
 	data, err := io.ReadAll(resp.Body)
