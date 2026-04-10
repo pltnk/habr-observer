@@ -10,13 +10,6 @@ import (
 	"net/http"
 )
 
-const sharingEndpoint = "https://300.ya.ru/api/sharing"
-const maxErrSnippet = 2048 // 2KiB
-
-type httpDoer interface {
-	Do(req *http.Request) (*http.Response, error)
-}
-
 type sharingRequestPayload struct {
 	Token string `json:"token"`
 }
@@ -55,7 +48,7 @@ func getSummaryContentAPI(ctx context.Context, doer httpDoer, token string) ([]s
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippet))
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippetBodySize))
 		return nil, fmt.Errorf("API: HTTP %s: %q", resp.Status, string(bytes.TrimSpace(body)))
 	}
 

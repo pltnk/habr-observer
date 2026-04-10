@@ -13,11 +13,6 @@ import (
 	"golang.org/x/net/html"
 )
 
-const (
-	maxBodySize  = 5 * 1024 * 1024 // 5 MiB – hard cap on what we'll parse
-	maxDrainSize = 2 * maxBodySize // 10 MiB – drain cap for connection reuse
-)
-
 func getSummaryContentHTML(ctx context.Context, doer httpDoer, u url.URL) ([]string, error) {
 	if doer == nil {
 		return nil, errors.New("HTML: nil httpDoer")
@@ -33,16 +28,16 @@ func getSummaryContentHTML(ctx context.Context, doer httpDoer, u url.URL) ([]str
 		return nil, fmt.Errorf("HTML: doing request: %w", err)
 	}
 	defer func() {
-		io.Copy(io.Discard, io.LimitReader(resp.Body, maxDrainSize))
+		io.Copy(io.Discard, io.LimitReader(resp.Body, maxDrainBodySize))
 		resp.Body.Close()
 	}()
 
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippet))
+		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippetBodySize))
 		return nil, fmt.Errorf("HTML: HTTP %s: %q", resp.Status, string(bytes.TrimSpace(body)))
 	}
 
-	parsed, err := html.Parse(io.LimitReader(resp.Body, maxBodySize))
+	parsed, err := html.Parse(io.LimitReader(resp.Body, maxReadBodySize))
 	if err != nil {
 		return nil, fmt.Errorf("HTML: parsing HTML: %w", err)
 	}

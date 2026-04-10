@@ -1,0 +1,11 @@
+package yagpt
+
+const (
+	baseHostname          = "300.ya.ru"
+	baseURL               = "https://" + baseHostname
+	sharingURLEndpoint    = baseURL + "/api/sharing-url"
+	sharingEndpoint       = baseURL + "/api/sharing"
+	maxErrSnippetBodySize = 2048                // 2 KiB – hard cap for error snippets
+	maxReadBodySize       = 5 * 1024 * 1024     // 5 MiB – hard cap on what we'll parse
+	maxDrainBodySize      = 2 * maxReadBodySize // 10 MiB – drain cap for connection reuse
+)

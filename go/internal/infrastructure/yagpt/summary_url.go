@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-const baseHostname = "300.ya.ru"
-
 type SummaryURL struct {
 	url   url.URL
 	token string
