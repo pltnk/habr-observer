@@ -45,7 +45,10 @@ func getSummaryContentAPI(ctx context.Context, doer httpDoer, token string) ([]s
 	if err != nil {
 		return nil, fmt.Errorf("API: doing request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		io.Copy(io.Discard, io.LimitReader(resp.Body, maxDrainBodySize))
+		resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippetBodySize))
@@ -53,12 +56,17 @@ func getSummaryContentAPI(ctx context.Context, doer httpDoer, token string) ([]s
 	}
 
 	var parsed sharingResponse
-	err = json.NewDecoder(resp.Body).Decode(&parsed)
+	err = json.NewDecoder(io.LimitReader(resp.Body, maxReadBodySize)).Decode(&parsed)
 	if err != nil {
 		return nil, fmt.Errorf("API: decoding response: %w", err)
 	}
 
-	result := make([]string, len(parsed.Thesis))
+	thesisLen := len(parsed.Thesis)
+	if thesisLen == 0 {
+		return nil, errors.New("API: empty thesis in JSON response")
+	}
+
+	result := make([]string, thesisLen)
 	for i := range parsed.Thesis {
 		result[i] = parsed.Thesis[i].Content
 	}
