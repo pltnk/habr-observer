@@ -16,6 +16,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+
+	"golang.org/x/time/rate"
 )
 
 // Client is a YandexGPT summarization client. It is safe for concurrent
@@ -25,8 +27,9 @@ import (
 //
 // A Client must be created with [NewClient]; the zero value is not usable.
 type Client struct {
-	client *http.Client
-	token  string
+	client  *http.Client
+	token   string
+	limiter *rate.Limiter
 }
 
 // NewClient returns a Client authenticated with the given OAuth token.
@@ -34,7 +37,7 @@ type Client struct {
 // The authToken is trimmed of surrounding whitespace and must be
 // non-empty; an empty or whitespace-only token returns an error.
 //
-// If hc is nil, a default [http.Client] with a [defaultTimeout] is used.
+// If hc is nil, a default [http.Client] with a 60-second timeout is used.
 // Callers that need custom transports, timeouts, or middleware
 // (for example, retry or logging wrappers) should pass their own [http.Client].
 func NewClient(authToken string, hc *http.Client) (*Client, error) {
@@ -47,7 +50,11 @@ func NewClient(authToken string, hc *http.Client) (*Client, error) {
 		hc = &http.Client{Timeout: defaultTimeout}
 	}
 
-	return &Client{client: hc, token: authToken}, nil
+	return &Client{
+		client:  hc,
+		token:   authToken,
+		limiter: rate.NewLimiter(rate.Every(sharingURLRateLimitWindow/sharingURLRateLimit), sharingURLRateLimitBurst),
+	}, nil
 }
 
 // GetSummaryURL requests a sharing URL for the given article from the
@@ -57,14 +64,23 @@ func NewClient(authToken string, hc *http.Client) (*Client, error) {
 // the opaque token embedded in its path, which can be passed to
 // [Client.GetSummaryContent] to retrieve the summary text.
 //
+// Calls to this method are rate-limited client-side to comply with
+// the API's published limits; under load, this method may block
+// until a token is available or until ctx is cancelled.
+//
 // The context controls cancellation and deadline for the underlying
 // HTTP request. Errors from the API, including non-2xx responses and
 // malformed payloads, are wrapped with descriptive context.
 func (c *Client) GetSummaryURL(ctx context.Context, articleURL string) (SummaryURL, error) {
+	if err := c.limiter.Wait(ctx); err != nil {
+		return SummaryURL{}, fmt.Errorf("yagpt: getting summary URL rate limit: %w", err)
+	}
+
 	su, err := getSharingURL(ctx, c.client, c.token, articleURL)
 	if err != nil {
 		return SummaryURL{}, fmt.Errorf("yagpt: getting summary URL for %q: %w", articleURL, err)
 	}
+
 	return su, nil
 }
 
