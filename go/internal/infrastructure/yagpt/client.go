@@ -75,7 +75,9 @@ func (c *Client) GetSummaryURL(ctx context.Context, articleURL string) (SummaryU
 // it returns structured data. If the API call fails for any reason
 // (network error, non-2xx status, malformed response), it transparently
 // falls back to fetching the sharing page's HTML and extracting the
-// summary from its og:description meta tag.
+// summary from its og:description meta tag. The fallback is skipped
+// if the context has already been cancelled or its deadline exceeded,
+// in which case only the API error is returned.
 //
 // If both the API and HTML paths fail, the returned error joins both
 // underlying errors via [errors.Join] so callers can inspect either
@@ -86,6 +88,10 @@ func (c *Client) GetSummaryContent(ctx context.Context, su SummaryURL) ([]string
 	content, apiErr := getSummaryContentAPI(ctx, c.client, su.Token())
 	if apiErr == nil {
 		return content, nil
+	}
+
+	if ctx.Err() != nil {
+		return nil, fmt.Errorf("yagpt: getting summary content from %q: %w", su.String(), apiErr)
 	}
 
 	content, htmlErr := getSummaryContentHTML(ctx, c.client, su.URL())
