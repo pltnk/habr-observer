@@ -67,6 +67,17 @@ func expectedSummaryLines(t *testing.T) []string {
 	return lines
 }
 
+// mustSummaryURL builds a SummaryURL from raw or fails the test.
+func mustSummaryURL(t *testing.T, raw string) SummaryURL {
+	t.Helper()
+
+	su, err := NewSummaryURL(raw)
+	if err != nil {
+		t.Fatalf("NewSummaryURL(%q): %v", raw, err)
+	}
+	return su
+}
+
 // RT adapts a plain function to the [http.RoundTripper] interface,
 // so tests can inject fake HTTP responses without defining a new type.
 type RT func(*http.Request) (*http.Response, error)

@@ -16,19 +16,8 @@ import (
 
 // testSummaryRawURL is a public 300.ya.ru summary page used as the request
 // target in HTML tests (and fetched for real by the live test). It is the
-// same article as testArticleToken / summaryFixtureFile.
+// same article as testArticleToken / summaryContentFile.
 const testSummaryRawURL = baseURL + "/" + testArticleToken
-
-// mustSummaryURL builds a SummaryURL from raw or fails the test.
-func mustSummaryURL(t *testing.T, raw string) SummaryURL {
-	t.Helper()
-
-	su, err := NewSummaryURL(raw)
-	if err != nil {
-		t.Fatalf("NewSummaryURL(%q): %v", raw, err)
-	}
-	return su
-}
 
 // parseHTML parses s into an *html.Node or fails the test.
 func parseHTML(t *testing.T, s string) *html.Node {
