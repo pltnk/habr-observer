@@ -11,113 +11,20 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
-	"sync"
 	"testing"
-	"time"
 )
 
-func TestClient_http_DefaultHTTPClient(t *testing.T) {
+func TestNewClient_DefaultHTTPClient(t *testing.T) {
 	t.Parallel()
 
-	var c Client
-	hc := c.http()
-
-	if hc == nil {
-		t.Fatal("http() returned nil")
-	}
+	c := NewClient(nil)
 
 	if c.c == nil {
-		t.Fatal("http() did not store default client into c.c")
+		t.Fatal("NewClient(nil): nil http client")
 	}
-
-	if hc != c.c {
-		t.Fatal("http() did not return the same client as stored in c.c")
+	if c.c.Timeout != defaultTimeout {
+		t.Fatalf("default Timeout = %v, want %v", c.c.Timeout, defaultTimeout)
 	}
-
-	if hc.Timeout != defaultTimeout {
-		t.Fatalf("default Timeout = %v, want %v", hc.Timeout, defaultTimeout)
-	}
-
-	hc2 := c.http()
-	if hc2 != hc {
-		t.Fatal("http() returned a different client on second call")
-	}
-}
-
-func TestClient_http_PreservesProvidedClient(t *testing.T) {
-	t.Parallel()
-
-	to := 123 * time.Millisecond
-	hc := &http.Client{Timeout: to}
-	c := NewClient(hc)
-
-	got := c.http()
-	if got != hc {
-		t.Fatal("http() did not return the provided http.Client")
-	}
-	if got.Timeout != to {
-		t.Fatalf("timeout mutated: got %v, want %v", got.Timeout, to)
-	}
-}
-
-func TestClient_http_ConcurrentSingleInit(t *testing.T) {
-	t.Parallel()
-
-	var c Client
-
-	const N = 64
-	var wg sync.WaitGroup
-	wg.Add(N)
-
-	// Barrier to start all goroutines simultaneously.
-	start := make(chan struct{})
-	results := make(chan *http.Client, N)
-
-	for range N {
-		go func() {
-			defer wg.Done()
-			<-start
-			results <- c.http()
-		}()
-	}
-
-	close(start)
-	wg.Wait()
-	close(results)
-
-	// All returned pointers must be identical, and c.c must be that same pointer.
-	var first *http.Client
-	for hc := range results {
-		if first == nil {
-			first = hc
-			continue
-		}
-		if hc != first {
-			t.Fatal("http() returned different *http.Client instances across concurrent calls")
-		}
-	}
-	if first == nil {
-		t.Fatal("no client returned")
-	}
-	if c.c != first {
-		t.Fatal("c.c not set to the initialized *http.Client")
-	}
-	if first.Timeout != defaultTimeout {
-		t.Fatalf("initialized Timeout = %v, want %v", first.Timeout, defaultTimeout)
-	}
-}
-
-func TestClient_http_PanicsOnNilReceiver(t *testing.T) {
-	t.Parallel()
-
-	defer func() {
-		if r := recover(); r == nil {
-			t.Fatal("expected panic for nil *Client")
-		}
-	}()
-
-	var c *Client
-	_ = c.http()
 }
 
 func TestGetArticles_Errors(t *testing.T) {

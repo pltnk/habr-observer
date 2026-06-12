@@ -7,7 +7,6 @@ import (
 	"habr-observer/internal/entities"
 	"io"
 	"net/http"
-	"sync"
 	"time"
 )
 
@@ -15,29 +14,17 @@ const defaultTimeout = 10 * time.Second
 const maxErrSnippet = 2048 // 2KiB
 
 type Client struct {
-	c    *http.Client
-	once sync.Once
+	c *http.Client
 }
 
+// NewClient returns a Client backed by hc. If hc is nil, a default
+// [http.Client] with a 10-second timeout is used. A Client must be created
+// with NewClient; the zero value is not usable.
 func NewClient(hc *http.Client) *Client {
 	if hc == nil {
 		hc = &http.Client{Timeout: defaultTimeout}
 	}
 	return &Client{c: hc}
-}
-
-func (c *Client) http() *http.Client {
-	if c == nil {
-		panic("nil *habr.Client: construct with habr.NewClient(nil)")
-	}
-
-	c.once.Do(func() {
-		if c.c == nil {
-			c.c = &http.Client{Timeout: defaultTimeout}
-		}
-	})
-
-	return c.c
 }
 
 func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
@@ -47,7 +34,7 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 		return nil, fmt.Errorf("getting XML from %q: %w", url, err)
 	}
 
-	resp, err := c.http().Do(req)
+	resp, err := c.c.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("getting XML from %q: %w", url, err)
 	}
