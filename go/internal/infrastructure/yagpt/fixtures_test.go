@@ -31,6 +31,10 @@ const (
 	// summaryPageFile is the 300.ya.ru summary page for testArticleToken,
 	// served by the HTML integration test.
 	summaryPageFile = "summary_page.html"
+
+	// sharingURLFile is a successful /api/sharing-url response,
+	// served by the sharing-URL integration test.
+	sharingURLFile = "sharing_url.json"
 )
 
 // readTestData returns the contents of testdata/filename or fails the test.
