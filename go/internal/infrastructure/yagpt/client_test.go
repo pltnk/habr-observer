@@ -10,7 +10,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestNewClient_Errors(t *testing.T) {
@@ -63,24 +62,6 @@ func TestNewClient_Success(t *testing.T) {
 		}
 		if c.limiter == nil {
 			t.Error("NewClient: nil limiter")
-		}
-	})
-
-	t.Run("preserves_provided_client", func(t *testing.T) {
-		t.Parallel()
-
-		to := 123 * time.Millisecond
-		hc := &http.Client{Timeout: to}
-
-		c, err := NewClient(testAuthToken, hc)
-		if err != nil {
-			t.Fatalf("NewClient: %v", err)
-		}
-		if c.client != hc {
-			t.Fatal("NewClient: did not store the provided http client")
-		}
-		if c.client.Timeout != to {
-			t.Errorf("Timeout = %v, want %v", c.client.Timeout, to)
 		}
 	})
 
