@@ -214,18 +214,9 @@ func TestGetSummaryContentAPI_Success(t *testing.T) {
 func TestGetSummaryContentAPI_HTTPIntegration(t *testing.T) {
 	t.Parallel()
 
-	testBody := readTestData(t, "summary_content_valid.json")
+	testBody := readTestData(t, summaryContentFile)
 
-	var testData sharingResponse
-	err := json.Unmarshal(testBody, &testData)
-	if err != nil {
-		t.Fatalf("unmarshalling test data: %v", err)
-	}
-
-	wantResult := make([]string, len(testData.Thesis))
-	for i, el := range testData.Thesis {
-		wantResult[i] = el.Content
-	}
+	wantResult := expectedSummaryLines(t)
 
 	wantURL, err := url.Parse(sharingEndpoint)
 	if err != nil {

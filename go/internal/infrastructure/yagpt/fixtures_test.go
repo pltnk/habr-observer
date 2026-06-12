@@ -3,6 +3,7 @@ package yagpt
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -22,6 +23,14 @@ const (
 	// testArticleToken is a valid public article sharing token
 	// (the path segment from a 300.ya.ru/<token> URL), not an OAuth credential.
 	testArticleToken = "BoudKEx0"
+
+	// summaryContentFile is the canonical summary for testArticleToken, used as
+	// the single source of truth for the expected lines in the integration tests.
+	summaryContentFile = "summary_content.json"
+
+	// summaryPageFile is the 300.ya.ru summary page for testArticleToken,
+	// served by the HTML integration test.
+	summaryPageFile = "summary_page.html"
 )
 
 // readTestData returns the contents of testdata/filename or fails the test.
@@ -34,6 +43,24 @@ func readTestData(t *testing.T, filename string) []byte {
 		t.Fatalf("reading test data: %v", err)
 	}
 	return b
+}
+
+// expectedSummaryLines returns the thesis contents from summaryFixtureFile.
+// Both the API and HTML integration tests assert against these, since both the
+// JSON sharing response and the page's og:description describe the same article.
+func expectedSummaryLines(t *testing.T) []string {
+	t.Helper()
+
+	var resp sharingResponse
+	if err := json.Unmarshal(readTestData(t, summaryContentFile), &resp); err != nil {
+		t.Fatalf("unmarshalling %s: %v", summaryContentFile, err)
+	}
+
+	lines := make([]string, len(resp.Thesis))
+	for i, el := range resp.Thesis {
+		lines[i] = el.Content
+	}
+	return lines
 }
 
 // RT adapts a plain function to the [http.RoundTripper] interface,
