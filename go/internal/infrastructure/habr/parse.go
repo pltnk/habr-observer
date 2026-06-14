@@ -5,7 +5,7 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
-	"habr-observer/internal/entities"
+	"habr-observer/internal/domain"
 	"strings"
 	"time"
 )
@@ -39,7 +39,7 @@ func parseDate(date string) (time.Time, error) {
 	return t, nil
 }
 
-func parseXML(data []byte) ([]*entities.Article, error) {
+func parseXML(data []byte) ([]*domain.Article, error) {
 	data = bytes.TrimSpace(data)
 
 	var parsed rss
@@ -53,14 +53,14 @@ func parseXML(data []byte) ([]*entities.Article, error) {
 		return nil, errors.New("parsing XML: no items found")
 	}
 
-	articles := make([]*entities.Article, 0, nItems)
+	articles := make([]*domain.Article, 0, nItems)
 	for _, it := range parsed.Channel.Items {
 		pd, err := parseDate(it.PubDate)
 		if err != nil {
 			return nil, fmt.Errorf("parsing XML: %w", err)
 		}
 
-		articles = append(articles, &entities.Article{
+		articles = append(articles, &domain.Article{
 			ID:      strings.TrimSpace(it.GUID),
 			Title:   strings.TrimSpace(it.Title),
 			PubDate: pd,

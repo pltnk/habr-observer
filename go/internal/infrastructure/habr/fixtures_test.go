@@ -3,7 +3,7 @@ package habr
 import (
 	"context"
 	"crypto/tls"
-	"habr-observer/internal/entities"
+	"habr-observer/internal/domain"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -44,10 +44,10 @@ func mustParseRFC1123(t *testing.T, s string) time.Time {
 	return tt
 }
 
-func newExpectedThreeArticles(t *testing.T) [testDataExpectedItemsNum]*entities.Article {
+func newExpectedThreeArticles(t *testing.T) [testDataExpectedItemsNum]*domain.Article {
 	t.Helper()
 
-	return [testDataExpectedItemsNum]*entities.Article{
+	return [testDataExpectedItemsNum]*domain.Article{
 		{
 			ID:      "https://habr.com/ru/articles/133473/",
 			Title:   "[Перевод] Делаем приватный монитор из старого LCD монитора",

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"habr-observer/internal/entities"
+	"habr-observer/internal/domain"
 	"io"
 	"net/http"
 	"time"
@@ -53,7 +53,7 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 	return data, nil
 }
 
-func (c *Client) GetArticles(ctx context.Context, f RSSFeed) ([]*entities.Article, error) {
+func (c *Client) GetArticles(ctx context.Context, f RSSFeed) ([]*domain.Article, error) {
 	xml, err := c.getXML(ctx, f)
 	if err != nil {
 		return nil, fmt.Errorf("getting articles for %s: %w", f, err)
