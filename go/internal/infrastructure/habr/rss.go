@@ -1,10 +1,16 @@
-// Package habr provides strongly typed references to Habr “top articles” RSS feeds.
+// Package habr provides strongly typed references to Habr's "top articles" RSS
+// feeds and a client for fetching and parsing them into domain articles.
 package habr
 
 //go:generate go run golang.org/x/tools/cmd/stringer -type=RSSFeed
 
+// RSSFeed identifies one of Habr's "top articles" RSS feeds, distinguished by
+// ranking window. Only the exported Feed* constants are valid values;
+// [RSSFeed.Name] and [RSSFeed.URL] panic on any other.
 type RSSFeed int
 
+// The available feeds, one per Habr ranking window. Their declaration order —
+// shortest window first — is the canonical order returned by [AllFeeds].
 const (
 	FeedDaily RSSFeed = iota
 	FeedWeekly

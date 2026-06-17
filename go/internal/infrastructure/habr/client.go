@@ -13,6 +13,9 @@ import (
 const defaultTimeout = 10 * time.Second
 const maxErrSnippet = 2048 // 2KiB
 
+// Client fetches and parses Habr "top articles" RSS feeds into domain articles.
+// It is safe for concurrent use as long as its underlying [http.Client] is.
+// A Client must be created with [NewClient]; the zero value is not usable.
 type Client struct {
 	c *http.Client
 }
@@ -53,6 +56,10 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 	return data, nil
 }
 
+// GetArticles fetches feed f over HTTP and parses it into articles in feed
+// order. The returned articles carry no summary; that is filled in elsewhere.
+// Errors from the request, a non-200 response, or malformed RSS are wrapped
+// with the feed name. The context bounds the underlying HTTP request.
 func (c *Client) GetArticles(ctx context.Context, f RSSFeed) ([]*domain.Article, error) {
 	xml, err := c.getXML(ctx, f)
 	if err != nil {
