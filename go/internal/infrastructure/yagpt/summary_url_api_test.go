@@ -219,6 +219,28 @@ func TestGetSharingURL_Errors(t *testing.T) {
 	}
 }
 
+func TestGetSharingURL_NotFound(t *testing.T) {
+	t.Parallel()
+
+	rt := RT(func(r *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Status:     fmt.Sprintf("%d %s", http.StatusNotFound, http.StatusText(http.StatusNotFound)),
+			Body:       io.NopCloser(strings.NewReader("")),
+			Request:    r,
+		}, nil
+	})
+
+	hc := newHTTPClientWithRT(t, rt)
+	got, err := getSharingURL(context.Background(), hc, testAuthToken, testArticleURL)
+	if !errors.Is(err, ErrSummaryUnavailable) {
+		t.Fatalf("getSharingURL: want ErrSummaryUnavailable, got %v", err)
+	}
+	if !reflect.DeepEqual(got, SummaryURL{}) {
+		t.Fatalf("getSharingURL: got non-zero result %+v", got)
+	}
+}
+
 func TestGetSharingURL_Success(t *testing.T) {
 	t.Parallel()
 

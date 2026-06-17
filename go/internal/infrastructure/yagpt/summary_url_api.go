@@ -11,6 +11,16 @@ import (
 	"strings"
 )
 
+// ErrSummaryUnavailable indicates the summarization service has no summary for
+// the requested article, typically because the article is too long for the
+// model to summarize. The service signals this with an HTTP 404 from the
+// sharing-url endpoint.
+//
+// Callers can detect it with errors.Is(err, ErrSummaryUnavailable), including
+// through the wrapping added by [Client.GetSummaryURL], and treat it as a
+// terminal "no summary exists" outcome rather than a transient failure.
+var ErrSummaryUnavailable = errors.New("yagpt: summary unavailable")
+
 type sharingURLRequestPayload struct {
 	ArticleURL string `json:"article_url"`
 }
@@ -56,6 +66,10 @@ func getSharingURL(ctx context.Context, doer httpDoer, authToken, articleURL str
 		io.Copy(io.Discard, io.LimitReader(resp.Body, maxDrainBodySize))
 		resp.Body.Close()
 	}()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return SummaryURL{}, ErrSummaryUnavailable
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(resp.Body, maxErrSnippetBodySize))

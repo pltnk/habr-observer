@@ -146,6 +146,38 @@ func TestClient_GetSummaryURL_Error(t *testing.T) {
 	}
 }
 
+// TestClient_GetSummaryURL_Unavailable pins the public detection contract: a 404
+// from the sharing-url endpoint must remain matchable as ErrSummaryUnavailable
+// through the wrapping GetSummaryURL adds, so callers can tell "no summary exists"
+// apart from a transient failure. Without this, a regression from %w to %v in
+// client.go would break errors.Is for every caller, with the rest of the suite
+// staying green.
+func TestClient_GetSummaryURL_Unavailable(t *testing.T) {
+	t.Parallel()
+
+	rt := RT(func(r *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Status:     fmt.Sprintf("%d %s", http.StatusNotFound, http.StatusText(http.StatusNotFound)),
+			Body:       io.NopCloser(strings.NewReader("")),
+			Request:    r,
+		}, nil
+	})
+
+	c, err := NewClient(testAuthToken, newHTTPClientWithRT(t, rt))
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+
+	got, err := c.GetSummaryURL(context.Background(), testArticleURL)
+	if !errors.Is(err, ErrSummaryUnavailable) {
+		t.Fatalf("GetSummaryURL: want ErrSummaryUnavailable through wrapping, got %v", err)
+	}
+	if !reflect.DeepEqual(got, SummaryURL{}) {
+		t.Fatalf("GetSummaryURL: got non-zero result %+v", got)
+	}
+}
+
 func TestClient_GetSummaryURL_RateLimited(t *testing.T) {
 	t.Parallel()
 

@@ -7,7 +7,6 @@
 // via [Client.GetSummaryContent]. The latter prefers the JSON API and
 // falls back to scraping the og:description meta tag from the sharing
 // page if the API call fails.
-
 package yagpt
 
 import (
