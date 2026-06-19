@@ -12,8 +12,7 @@ import (
 )
 
 // ErrSummaryUnavailable indicates the summarization service has no summary for
-// the requested article, typically because the article is too long for the
-// model to summarize. The service signals this with an HTTP 404 from the
+// the requested article. The service signals this with an HTTP 404 from the
 // sharing-url endpoint.
 //
 // Callers can detect it with errors.Is(err, ErrSummaryUnavailable), including
