@@ -23,6 +23,7 @@ const (
 	envAuthToken     = "OBSERVER_AUTH_TOKEN"
 	envUpdateTimeout = "OBSERVER_FEED_UPDATE_TIMEOUT"
 	envCacheTTL      = "OBSERVER_FEED_CACHE_TTL"
+	envServerAddr    = "OBSERVER_SERVER_ADDR"
 )
 
 // Defaults applied when the corresponding variable is unset.
@@ -35,6 +36,7 @@ const (
 	defMongoFeeds        = "feeds"
 	defUpdateTimeoutSecs = 600
 	defCacheTTLSecs      = 60
+	defServerAddr        = ":8080"
 )
 
 // MongoConfig holds the connection parts for MongoDB. Credentials are kept
@@ -110,6 +112,20 @@ func getEnvOnce(key, fallback string) string {
 	return value
 }
 
+// loadMongo reads the MongoDB connection settings from the environment,
+// applying defaults. It scrubs the user and password after reading (see
+// [getEnvOnce]), so it must be called at most once per process.
+func loadMongo() MongoConfig {
+	return MongoConfig{
+		Host:         getEnv(envMongoHost, defMongoHost),
+		User:         getEnvOnce(envMongoUser, defMongoUser),
+		Password:     getEnvOnce(envMongoPass, defMongoPass),
+		DB:           getEnv(envMongoDB, defMongoDB),
+		ArticlesColl: getEnv(envMongoArticles, defMongoArticles),
+		FeedsColl:    getEnv(envMongoFeeds, defMongoFeeds),
+	}
+}
+
 // Load reads configuration from the environment, applies defaults, and
 // validates it, returning an error if a value is malformed or a required value
 // is missing.
@@ -129,18 +145,41 @@ func Load() (*Config, error) {
 			UpdateTimeout: time.Duration(updateSecs) * time.Second,
 			CacheTTL:      time.Duration(cacheSecs) * time.Second,
 		},
-		Mongo: MongoConfig{
-			Host:         getEnv(envMongoHost, defMongoHost),
-			User:         getEnvOnce(envMongoUser, defMongoUser),
-			Password:     getEnvOnce(envMongoPass, defMongoPass),
-			DB:           getEnv(envMongoDB, defMongoDB),
-			ArticlesColl: getEnv(envMongoArticles, defMongoArticles),
-			FeedsColl:    getEnv(envMongoFeeds, defMongoFeeds),
-		},
+		Mongo: loadMongo(),
 	}
 
 	if err := cfg.validate(); err != nil {
 		return nil, err
+	}
+	return cfg, nil
+}
+
+// ServerConfig is the read-side HTTP server's resolved configuration. The server
+// reads feeds from MongoDB and serves them cached, so unlike the updater it
+// needs no summarization token — [LoadServer] does not require OBSERVER_AUTH_TOKEN.
+type ServerConfig struct {
+	Addr     string
+	CacheTTL time.Duration
+	Mongo    MongoConfig
+}
+
+// LoadServer reads the read-side server's configuration from the environment,
+// applies defaults, and validates it. Like [Load] it scrubs Mongo secrets after
+// reading, so it is not meant to be called more than once.
+func LoadServer() (*ServerConfig, error) {
+	cacheSecs, err := getEnvInt(envCacheTTL, defCacheTTLSecs)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg := &ServerConfig{
+		Addr:     getEnv(envServerAddr, defServerAddr),
+		CacheTTL: time.Duration(cacheSecs) * time.Second,
+		Mongo:    loadMongo(),
+	}
+
+	if cfg.CacheTTL <= 0 {
+		return nil, fmt.Errorf("%s must be positive", envCacheTTL)
 	}
 	return cfg, nil
 }

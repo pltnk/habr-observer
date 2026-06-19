@@ -12,7 +12,7 @@ import (
 // test is hermetic regardless of the developer's real environment.
 var allEnvKeys = []string{
 	envMongoUser, envMongoPass, envMongoHost, envMongoDB, envMongoArticles,
-	envMongoFeeds, envAuthToken, envUpdateTimeout, envCacheTTL,
+	envMongoFeeds, envAuthToken, envUpdateTimeout, envCacheTTL, envServerAddr,
 }
 
 // setEnv sets every OBSERVER_* variable for the duration of the test (restored
@@ -92,6 +92,82 @@ func TestLoad_Overrides(t *testing.T) {
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("Load() =\n %+v\nwant\n %+v", got, want)
+	}
+}
+
+func TestLoadServer_Defaults(t *testing.T) {
+	// Crucially, OBSERVER_AUTH_TOKEN is left unset: the read server must load
+	// without it.
+	setEnv(t, map[string]string{})
+
+	got, err := LoadServer()
+	if err != nil {
+		t.Fatalf("LoadServer() error = %v", err)
+	}
+
+	want := &ServerConfig{
+		Addr:     defServerAddr,
+		CacheTTL: defCacheTTLSecs * time.Second,
+		Mongo: MongoConfig{
+			Host:         defMongoHost,
+			User:         defMongoUser,
+			Password:     defMongoPass,
+			DB:           defMongoDB,
+			ArticlesColl: defMongoArticles,
+			FeedsColl:    defMongoFeeds,
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("LoadServer() =\n %+v\nwant\n %+v", got, want)
+	}
+}
+
+func TestLoadServer_Overrides(t *testing.T) {
+	setEnv(t, map[string]string{
+		envServerAddr:    "127.0.0.1:9000",
+		envCacheTTL:      "30",
+		envMongoHost:     "mongo.example.com:27018",
+		envMongoUser:     "alice",
+		envMongoPass:     "secret",
+		envMongoDB:       "obsdb",
+		envMongoArticles: "arts",
+		envMongoFeeds:    "fds",
+	})
+
+	got, err := LoadServer()
+	if err != nil {
+		t.Fatalf("LoadServer() error = %v", err)
+	}
+
+	want := &ServerConfig{
+		Addr:     "127.0.0.1:9000",
+		CacheTTL: 30 * time.Second,
+		Mongo: MongoConfig{
+			Host:         "mongo.example.com:27018",
+			User:         "alice",
+			Password:     "secret",
+			DB:           "obsdb",
+			ArticlesColl: "arts",
+			FeedsColl:    "fds",
+		},
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("LoadServer() =\n %+v\nwant\n %+v", got, want)
+	}
+}
+
+func TestLoadServer_InvalidCacheTTL(t *testing.T) {
+	setEnv(t, map[string]string{envCacheTTL: "1m"}) // not an integer number of seconds
+
+	cfg, err := LoadServer()
+	if err == nil {
+		t.Fatalf("LoadServer() error = nil, want error")
+	}
+	if cfg != nil {
+		t.Errorf("LoadServer() cfg = %+v, want nil on error", cfg)
+	}
+	if !strings.Contains(err.Error(), envCacheTTL) {
+		t.Errorf("LoadServer() error = %q, missing substring %q", err, envCacheTTL)
 	}
 }
 
