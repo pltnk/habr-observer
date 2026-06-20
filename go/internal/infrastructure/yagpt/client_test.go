@@ -10,6 +10,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"habr-observer/internal/domain"
 )
 
 func TestNewClient_Errors(t *testing.T) {
@@ -374,5 +376,70 @@ func TestClient_GetSummaryContent_BothFail(t *testing.T) {
 	}
 	if !errors.Is(err, htmlErr) {
 		t.Errorf("GetSummaryContent: joined error %q does not wrap the HTML error", err)
+	}
+}
+
+func TestClient_GetSummary_Success(t *testing.T) {
+	t.Parallel()
+
+	urlBody := readTestData(t, sharingURLFile)
+	contentBody := readTestData(t, summaryContentFile)
+	rt := RT(func(r *http.Request) (*http.Response, error) {
+		switch r.URL.String() {
+		case sharingURLEndpoint:
+			return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader(urlBody)), Request: r}, nil
+		case sharingEndpoint:
+			return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader(contentBody)), Request: r}, nil
+		default:
+			t.Errorf("unexpected request to %q", r.URL)
+			return nil, errors.New("unexpected URL")
+		}
+	})
+
+	c, err := NewClient(testAuthToken, newHTTPClientWithRT(t, rt))
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+
+	got, err := c.GetSummary(context.Background(), testArticleURL)
+	if err != nil {
+		t.Fatalf("GetSummary: %v", err)
+	}
+
+	want := &domain.Summary{URL: mustSummaryURL(t, testSummaryRawURL).String(), Content: expectedSummaryLines(t)}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("GetSummary: got %+v, want %+v", got, want)
+	}
+}
+
+// TestClient_GetSummary_Unavailable pins that a 404 from the sharing-url step
+// propagates as ErrSummaryUnavailable and the content fetch is skipped, so the
+// caller can apply its own "no summary" policy.
+func TestClient_GetSummary_Unavailable(t *testing.T) {
+	t.Parallel()
+
+	rt := RT(func(r *http.Request) (*http.Response, error) {
+		if r.URL.String() != sharingURLEndpoint {
+			t.Errorf("content fetch must not run when the sharing URL is unavailable (got %q)", r.URL)
+		}
+		return &http.Response{
+			StatusCode: http.StatusNotFound,
+			Status:     fmt.Sprintf("%d %s", http.StatusNotFound, http.StatusText(http.StatusNotFound)),
+			Body:       io.NopCloser(strings.NewReader("")),
+			Request:    r,
+		}, nil
+	})
+
+	c, err := NewClient(testAuthToken, newHTTPClientWithRT(t, rt))
+	if err != nil {
+		t.Fatalf("NewClient: %v", err)
+	}
+
+	got, err := c.GetSummary(context.Background(), testArticleURL)
+	if !errors.Is(err, ErrSummaryUnavailable) {
+		t.Fatalf("GetSummary: want ErrSummaryUnavailable, got %v", err)
+	}
+	if got != nil {
+		t.Fatalf("GetSummary: got non-nil result %+v", got)
 	}
 }

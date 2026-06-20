@@ -1,12 +1,6 @@
 // Package yagpt provides a client for YandexGPT's article summarization
 // service (300.ya.ru), which generates short thesis-style summaries of
 // online articles.
-//
-// Typical usage is a two-step flow: first obtain a SummaryURL for an
-// article via [Client.GetSummaryURL], then fetch the summary content
-// via [Client.GetSummaryContent]. The latter prefers the JSON API and
-// falls back to scraping the og:description meta tag from the sharing
-// page if the API call fails.
 package yagpt
 
 import (
@@ -17,6 +11,8 @@ import (
 	"strings"
 
 	"golang.org/x/time/rate"
+
+	"habr-observer/internal/domain"
 )
 
 // Client is a YandexGPT summarization client. It is safe for concurrent
@@ -115,4 +111,27 @@ func (c *Client) GetSummaryContent(ctx context.Context, su SummaryURL) ([]string
 	}
 
 	return nil, fmt.Errorf("yagpt: getting summary content from %q: %w", su.String(), errors.Join(apiErr, htmlErr))
+}
+
+// GetSummary resolves and fetches the summary for the given article in one call,
+// composing [Client.GetSummaryURL] and [Client.GetSummaryContent] into a
+// [domain.Summary]. It is the convenient path for callers that just want the
+// summary; those needing the intermediate sharing URL or finer control over the
+// two requests can call the underlying methods directly.
+//
+// A 404 from the sharing-url endpoint is returned as [ErrSummaryUnavailable]
+// (detectable with errors.Is) and the content fetch is skipped. The call is
+// rate-limited exactly as [Client.GetSummaryURL].
+func (c *Client) GetSummary(ctx context.Context, articleURL string) (*domain.Summary, error) {
+	su, err := c.GetSummaryURL(ctx, articleURL)
+	if err != nil {
+		return nil, err
+	}
+
+	content, err := c.GetSummaryContent(ctx, su)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Summary{URL: su.String(), Content: content}, nil
 }
