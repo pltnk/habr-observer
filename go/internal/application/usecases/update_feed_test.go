@@ -228,25 +228,25 @@ func TestUpdateFeedUsecase_Execute_IOErrors(t *testing.T) {
 			name:    "fetching_feed",
 			feeds:   &fakeFeedClient{err: wantErr},
 			repo:    &fakeRepo{},
-			wantCtx: "usecases: fetching feed",
+			wantCtx: "fetching feed",
 		},
 		{
 			name:    "loading_summarized_articles",
 			feeds:   feedWith(art("https://habr.com/a/")),
 			repo:    &fakeRepo{getErr: wantErr},
-			wantCtx: "usecases: loading summarized articles",
+			wantCtx: "loading summarized articles",
 		},
 		{
 			name:    "upserting_articles",
 			feeds:   feedWith(art("https://habr.com/a/")),
 			repo:    &fakeRepo{upsertErr: wantErr},
-			wantCtx: "usecases: upserting articles",
+			wantCtx: "upserting articles",
 		},
 		{
 			name:    "upserting_feed",
 			feeds:   feedWith(art("https://habr.com/a/")),
 			repo:    &fakeRepo{feedErr: wantErr},
-			wantCtx: "usecases: upserting feed",
+			wantCtx: "upserting feed",
 		},
 	}
 

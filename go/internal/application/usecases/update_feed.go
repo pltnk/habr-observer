@@ -43,6 +43,7 @@ func NewUpdateFeedUsecase(feeds FeedClient, summary SummaryClient, repo Reposito
 	if log == nil {
 		log = slog.Default()
 	}
+
 	return &UpdateFeedUsecase{feeds: feeds, summary: summary, repo: repo, log: log}
 }
 
@@ -56,12 +57,12 @@ func NewUpdateFeedUsecase(feeds FeedClient, summary SummaryClient, repo Reposito
 func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 	feedArticles, err := u.feeds.GetArticles(ctx, f)
 	if err != nil {
-		return fmt.Errorf("usecases: fetching feed: %w", err)
+		return fmt.Errorf("updating feed %q: fetching feed: %w", f, err)
 	}
 
 	summarized, err := u.repo.GetArticles(ctx, articleIDs(feedArticles))
 	if err != nil {
-		return fmt.Errorf("usecases: loading summarized articles: %w", err)
+		return fmt.Errorf("updating feed %q: loading summarized articles: %w", f, err)
 	}
 
 	// For articles we already have summarized, swap the stored version into the
@@ -82,7 +83,7 @@ func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 	// Summarize the rest; each success sets the article's Summary in place.
 	toStore := u.summarizeArticles(ctx, toSummarize)
 	if err := u.repo.UpsertArticles(ctx, toStore); err != nil {
-		return fmt.Errorf("usecases: upserting articles: %w", err)
+		return fmt.Errorf("updating feed %q: upserting articles: %w", f, err)
 	}
 
 	// feedArticles is already in feed order, so the snapshot is simply the ones
@@ -97,7 +98,7 @@ func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 
 	feed := &domain.Feed{ID: f.URL(), Name: f.Name(), Articles: snapshot}
 	if err := u.repo.UpsertFeed(ctx, feed); err != nil {
-		return fmt.Errorf("usecases: upserting feed: %w", err)
+		return fmt.Errorf("updating feed %q: upserting feed: %w", f, err)
 	}
 
 	return nil
@@ -133,7 +134,7 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 			// Recover so one article's panic skips only that article.
 			defer func() {
 				if r := recover(); r != nil {
-					u.log.Error("summary panicked; skipping article",
+					u.log.Error("updating feed: summary panicked; skipping article",
 						"url", a.ID, "panic", r, "stack", string(debug.Stack()))
 				}
 			}()
@@ -141,10 +142,11 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 			summary, err := u.summarize(ctx, a)
 			if err != nil {
 				if !isCancellation(err) {
-					u.log.Error("summary failed; skipping article", "url", a.ID, "err", err)
+					u.log.Error("updating feed: summary failed; skipping article", "url", a.ID, "err", err)
 				}
 				return // skip this article; never abort the batch
 			}
+
 			a.Summary = summary
 			out[i] = a
 		})
@@ -157,6 +159,7 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 			toStore = append(toStore, a)
 		}
 	}
+
 	return toStore
 }
 
@@ -166,15 +169,18 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 // the caller skips the article and a later run can retry it.
 func (u *UpdateFeedUsecase) summarize(ctx context.Context, a *domain.Article) (*domain.Summary, error) {
 	summary, err := u.summary.GetSummary(ctx, a.ID)
+
 	if errors.Is(err, yagpt.ErrSummaryUnavailable) {
 		return &domain.Summary{
 			URL:     placeholderSummaryURL,
 			Content: []string{placeholderSummaryMessage},
 		}, nil
 	}
+
 	if err != nil {
 		return nil, err
 	}
+
 	return summary, nil
 }
 
