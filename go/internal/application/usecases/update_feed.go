@@ -57,12 +57,12 @@ func NewUpdateFeedUsecase(feeds FeedClient, summary SummaryClient, repo Reposito
 func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 	feedArticles, err := u.feeds.GetArticles(ctx, f)
 	if err != nil {
-		return fmt.Errorf("updating feed %q: fetching feed: %w", f, err)
+		return fmt.Errorf("updating feed %q: fetching feed: %w", f.Name(), err)
 	}
 
 	summarized, err := u.repo.GetArticles(ctx, articleIDs(feedArticles))
 	if err != nil {
-		return fmt.Errorf("updating feed %q: loading summarized articles: %w", f, err)
+		return fmt.Errorf("updating feed %q: loading summarized articles: %w", f.Name(), err)
 	}
 
 	// For articles we already have summarized, swap the stored version into the
@@ -83,7 +83,7 @@ func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 	// Summarize the rest; each success sets the article's Summary in place.
 	toStore := u.summarizeArticles(ctx, toSummarize)
 	if err := u.repo.UpsertArticles(ctx, toStore); err != nil {
-		return fmt.Errorf("updating feed %q: upserting articles: %w", f, err)
+		return fmt.Errorf("updating feed %q: upserting articles: %w", f.Name(), err)
 	}
 
 	// feedArticles is already in feed order, so the snapshot is simply the ones
@@ -98,7 +98,7 @@ func (u *UpdateFeedUsecase) Execute(ctx context.Context, f habr.RSSFeed) error {
 
 	feed := &domain.Feed{ID: f.URL(), Name: f.Name(), Articles: snapshot}
 	if err := u.repo.UpsertFeed(ctx, feed); err != nil {
-		return fmt.Errorf("updating feed %q: upserting feed: %w", f, err)
+		return fmt.Errorf("updating feed %q: upserting feed: %w", f.Name(), err)
 	}
 
 	return nil
