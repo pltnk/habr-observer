@@ -1,0 +1,35 @@
+# syntax=docker/dockerfile:1
+
+# ---- build ----
+# Build natively and cross-compile to the target, so building a linux/amd64
+# image on an arm64 host needs no emulation.
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
+WORKDIR /src
+
+# Target platform, filled in by BuildKit; drives the cross-compile below.
+ARG TARGETOS TARGETARCH
+
+# Separate module download so it is cached until go.mod/go.sum change.
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+
+# Static, stripped binary: CGO off so it needs no libc and runs on
+# distroless/static. Cache mounts persist the module and build caches.
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/updater ./cmd/updater
+
+# ---- runtime ----
+# distroless/static suits a CGO-free binary: it ships the CA certificates the
+# binary's outbound HTTPS needs, plus a nonroot user and no shell.
+FROM gcr.io/distroless/static-debian13:nonroot
+COPY --from=build /out/updater /usr/local/bin/updater
+USER nonroot:nonroot
+
+# No HEALTHCHECK: the worker self-exits if a refresh cycle wedges, and the
+# compose restart policy revives it. There is no HTTP/health surface.
+ENTRYPOINT ["/usr/local/bin/updater"]
