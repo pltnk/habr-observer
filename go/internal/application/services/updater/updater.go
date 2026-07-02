@@ -1,7 +1,7 @@
 // Package updater runs the periodic worker that refreshes every Habr feed on a
-// fixed interval and reports liveness through a heartbeat file. Feeds are
-// refreshed one at a time: the rate-limited summary service is the throughput
-// bottleneck, so concurrency would not help.
+// fixed interval. Feeds are refreshed one at a time: the rate-limited summary
+// service is the throughput bottleneck, so concurrency would not help. A stall
+// watchdog exits the process if a cycle wedges, so a supervisor can restart it.
 package updater
 
 import (
@@ -14,10 +14,10 @@ import (
 	"habr-observer/internal/infrastructure/habr"
 )
 
-// isCancellation reports whether err is context cancellation — shutdown or a
-// cycle's deadline — which is expected and so suppressed from the logs.
-func isCancellation(err error) bool {
-	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+// feedUpdater refreshes a single feed. *usecases.UpdateFeedUsecase satisfies it;
+// Service depends on the interface so its tests can drive it with a fake.
+type feedUpdater interface {
+	Execute(ctx context.Context, f habr.RSSFeed) error
 }
 
 // Service refreshes every Habr feed once per cycle, sequentially. It holds no
@@ -28,8 +28,8 @@ type Service struct {
 	log     *slog.Logger
 }
 
-// New returns a [Service]. If log is nil, [slog.Default] is used.
-func New(updater feedUpdater, log *slog.Logger) *Service {
+// NewService returns a [Service]. If log is nil, [slog.Default] is used.
+func NewService(updater feedUpdater, log *slog.Logger) *Service {
 	if log == nil {
 		log = slog.Default()
 	}
@@ -69,4 +69,10 @@ func (s *Service) updateFeed(ctx context.Context, f habr.RSSFeed) (err error) {
 	}()
 
 	return s.updater.Execute(ctx, f)
+}
+
+// isCancellation reports whether err is context cancellation — shutdown or a
+// cycle's deadline — which is expected and so suppressed from the logs.
+func isCancellation(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }

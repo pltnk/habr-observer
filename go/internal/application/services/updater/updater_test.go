@@ -46,7 +46,7 @@ func TestUpdateAllFeeds_RunsEveryFeed(t *testing.T) {
 	t.Parallel()
 
 	upd := &fakeFeedUpdater{}
-	s := New(upd, quietLogger())
+	s := NewService(upd, quietLogger())
 
 	if err := s.UpdateAllFeeds(context.Background()); err != nil {
 		t.Fatalf("UpdateAllFeeds: %v", err)
@@ -89,7 +89,7 @@ func TestUpdateAllFeeds_HandlesEachFeedIndependently(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			s := New(tc.upd, quietLogger())
+			s := NewService(tc.upd, quietLogger())
 
 			err := s.UpdateAllFeeds(context.Background()) // a panicking feed must not crash the run
 			if tc.wantReported {
@@ -111,7 +111,7 @@ func TestUpdateAllFeeds_StopsOnCancellation(t *testing.T) {
 	t.Parallel()
 
 	upd := &fakeFeedUpdater{}
-	s := New(upd, quietLogger())
+	s := NewService(upd, quietLogger())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // canceled before the loop starts
