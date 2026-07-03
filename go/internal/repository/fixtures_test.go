@@ -21,15 +21,12 @@ import (
 
 const (
 	// testMongoImage pins the MongoDB image the integration tests run against; it
-	// matches the production image in db/Dockerfile and the two should move
-	// together.
+	// matches the production image in db/Dockerfile and the two must move together.
 	//
-	// We pin 8.0.4 deliberately: later 8.x releases (the current mongo:8.0 and
-	// mongo:8.3) add a hard startup check that refuses to run on Linux kernels
-	// 6.19+ (SERVER-121912), and the local dev kernel (OrbStack) is 7.0.x. 8.0.4
-	// predates that check, so the throwaway container boots both here and in CI.
-	// Bump it (and db/Dockerfile) to a patched release once one supports newer kernels.
-	testMongoImage = "mongo:8.0.4"
+	// 8.0.21+ refuse to start on Linux kernels 6.19+ (SERVER-121912) even where
+	// the incompatibility is fixed, so this pins the newest patch without that
+	// guard. Switch to a floating mongo:8.0 once SERVER-125742 relaxes it.
+	testMongoImage = "mongo:8.0.20"
 
 	// containerMongoUser and containerMongoPass are the root credentials created
 	// in the throwaway test container. They are test-only and never leave the
