@@ -139,42 +139,56 @@ func TestGetFeedsUsecase_Execute_ColdCacheError(t *testing.T) {
 }
 
 // TestGetFeedsUsecase_Execute_ServesStaleOnReloadError pins the degraded mode: a
-// failed reload of an expired cache serves the previous snapshot instead of
-// erroring, and does not extend its freshness, so every later call keeps
-// retrying the repository until one succeeds.
+// failed reload of an expired cache — a repository failure or a cancellation
+// alike — serves the previous snapshot instead of erroring, and does not extend
+// its freshness, so every later call keeps retrying until one succeeds.
 func TestGetFeedsUsecase_Execute_ServesStaleOnReloadError(t *testing.T) {
 	t.Parallel()
 
-	repo := &fakeFeedRepo{feeds: sampleFeeds()}
-	uc := NewGetFeedsUsecase(repo, []string{"daily"}, time.Minute, quietLogger())
-
-	clock := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-	uc.now = func() time.Time { return clock }
-
-	want, err := uc.Execute(context.Background())
-	if err != nil {
-		t.Fatalf("Execute (cold): %v", err)
+	cases := []struct {
+		name string
+		err  error
+	}{
+		{name: "transient", err: errors.New("boom")},
+		{name: "cancellation", err: context.Canceled},
 	}
 
-	// The cache expires and the repository starts failing.
-	clock = clock.Add(time.Minute + time.Second)
-	repo.err = errors.New("boom")
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 
-	got, err := uc.Execute(context.Background())
-	if err != nil {
-		t.Fatalf("Execute (stale): %v, want nil (stale snapshot served)", err)
-	}
-	if !reflect.DeepEqual(got, want) {
-		t.Fatalf("Execute (stale) = %+v, want the previous snapshot %+v", got, want)
-	}
+			repo := &fakeFeedRepo{feeds: sampleFeeds()}
+			uc := NewGetFeedsUsecase(repo, []string{"daily"}, time.Minute, quietLogger())
 
-	// The failure did not extend freshness: the next call retries the reload,
-	// and once the repository recovers the snapshot is refreshed.
-	repo.err = nil
-	if _, err := uc.Execute(context.Background()); err != nil {
-		t.Fatalf("Execute (recovered): %v", err)
-	}
-	if repo.calls != 3 {
-		t.Fatalf("repo calls = %d, want 3 (cold, failed reload, retry)", repo.calls)
+			clock := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
+			uc.now = func() time.Time { return clock }
+
+			want, err := uc.Execute(context.Background())
+			if err != nil {
+				t.Fatalf("Execute (cold): %v", err)
+			}
+
+			// The cache expires and the reload starts failing.
+			clock = clock.Add(time.Minute + time.Second)
+			repo.err = tc.err
+
+			got, err := uc.Execute(context.Background())
+			if err != nil {
+				t.Fatalf("Execute (stale): %v, want nil (stale snapshot served)", err)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("Execute (stale) = %+v, want the previous snapshot %+v", got, want)
+			}
+
+			// The failure did not extend freshness: the next call retries the
+			// reload, and once the repository recovers the snapshot is refreshed.
+			repo.err = nil
+			if _, err := uc.Execute(context.Background()); err != nil {
+				t.Fatalf("Execute (recovered): %v", err)
+			}
+			if repo.calls != 3 {
+				t.Fatalf("repo calls = %d, want 3 (cold, failed reload, retry)", repo.calls)
+			}
+		})
 	}
 }
