@@ -25,7 +25,6 @@ const (
 	envUpdateInterval = "OBSERVER_FEED_UPDATE_INTERVAL"
 	envUpdateTimeout  = "OBSERVER_FEED_UPDATE_TIMEOUT"
 	envCacheTTL       = "OBSERVER_FEED_CACHE_TTL"
-	envServerAddr     = "OBSERVER_SERVER_ADDR"
 )
 
 // Defaults applied when the corresponding variable is unset.
@@ -39,7 +38,6 @@ const (
 	defUpdateIntervalSecs = 600
 	defUpdateTimeoutSecs  = 600
 	defCacheTTLSecs       = 60
-	defServerAddr         = ":8080"
 )
 
 // MongoConfig holds the connection parts for MongoDB. Credentials are kept
@@ -163,7 +161,6 @@ func Load() (*Config, error) {
 // ServerConfig is the read-side HTTP server's resolved configuration. Unlike
 // the updater's [Config], it requires no summarization token.
 type ServerConfig struct {
-	Addr     string
 	CacheTTL time.Duration
 	Mongo    MongoConfig
 }
@@ -178,7 +175,6 @@ func LoadServer() (*ServerConfig, error) {
 	}
 
 	cfg := &ServerConfig{
-		Addr:     getEnv(envServerAddr, defServerAddr),
 		CacheTTL: time.Duration(cacheSecs) * time.Second,
 		Mongo:    loadMongo(),
 	}

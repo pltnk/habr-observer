@@ -24,6 +24,11 @@ import (
 )
 
 const (
+	// addr is the fixed container-internal listen address; the Dockerfile's
+	// EXPOSE, the compose port mapping, and the frontend's default backend URL
+	// all assume it.
+	addr = ":8080"
+
 	// closeTimeout bounds how long we wait to disconnect from MongoDB on shutdown.
 	closeTimeout = 10 * time.Second
 	// shutdownTimeout bounds draining in-flight HTTP requests on shutdown.
@@ -75,7 +80,7 @@ func run(log *slog.Logger) error {
 	handler := delivery.NewGetFeedsHandler(getFeeds, log)
 
 	srv := &http.Server{
-		Addr:              cfg.Addr,
+		Addr:              addr,
 		Handler:           routes(handler),
 		ReadHeaderTimeout: readHeaderTimeout,
 		ReadTimeout:       readTimeout,
@@ -83,7 +88,7 @@ func run(log *slog.Logger) error {
 		IdleTimeout:       idleTimeout,
 	}
 
-	log.Info("server starting", "addr", cfg.Addr, "cache_ttl", cfg.CacheTTL.String(), "mongo_db", cfg.Mongo.DB)
+	log.Info("server starting", "addr", addr, "cache_ttl", cfg.CacheTTL.String(), "mongo_db", cfg.Mongo.DB)
 	return serve(ctx, srv, log)
 }
 

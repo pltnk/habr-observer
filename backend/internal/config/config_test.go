@@ -13,7 +13,6 @@ import (
 var allEnvKeys = []string{
 	envMongoUser, envMongoPass, envMongoHost, envMongoDB, envMongoArticles,
 	envMongoFeeds, envAuthToken, envUpdateInterval, envUpdateTimeout, envCacheTTL,
-	envServerAddr,
 }
 
 // setEnv sets every OBSERVER_* variable for the duration of the test (restored
@@ -107,7 +106,6 @@ func TestLoadServer_Defaults(t *testing.T) {
 	}
 
 	want := &ServerConfig{
-		Addr:     defServerAddr,
 		CacheTTL: defCacheTTLSecs * time.Second,
 		Mongo: MongoConfig{
 			Host:         defMongoHost,
@@ -125,7 +123,6 @@ func TestLoadServer_Defaults(t *testing.T) {
 
 func TestLoadServer_Overrides(t *testing.T) {
 	setEnv(t, map[string]string{
-		envServerAddr:    "127.0.0.1:9000",
 		envCacheTTL:      "30",
 		envMongoHost:     "mongo.example.com:27018",
 		envMongoUser:     "alice",
@@ -141,7 +138,6 @@ func TestLoadServer_Overrides(t *testing.T) {
 	}
 
 	want := &ServerConfig{
-		Addr:     "127.0.0.1:9000",
 		CacheTTL: 30 * time.Second,
 		Mongo: MongoConfig{
 			Host:         "mongo.example.com:27018",
