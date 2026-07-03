@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import List
 
 
@@ -8,9 +8,6 @@ from typing import List
 class Summary:
     url: str
     content: List[str]
-
-    def as_dict(self) -> dict:
-        return asdict(self)
 
     @classmethod
     def from_dict(cls, d: dict) -> Summary:

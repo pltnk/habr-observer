@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import datetime
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from .summary import Summary
 
@@ -18,15 +18,13 @@ class Article:
     def url(self) -> str:
         return self._id
 
-    def as_dict(self) -> dict:
-        return asdict(self)
-
     @classmethod
     def from_dict(cls, d: dict) -> Article:
         return Article(
-            _id=d["_id"],
+            _id=d["id"],
             title=d["title"],
-            pub_date=d["pub_date"],
+            # Python 3.9's fromisoformat cannot parse the RFC 3339 "Z" suffix.
+            pub_date=datetime.datetime.fromisoformat(d["pub_date"].replace("Z", "+00:00")),
             author=d["author"],
             summary=Summary.from_dict(d["summary"]),
         )

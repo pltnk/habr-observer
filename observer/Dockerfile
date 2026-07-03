@@ -12,4 +12,4 @@ ARG SL_PORT=8501
 EXPOSE ${SL_PORT}
 ENV OBSERVER_SL_PORT=${SL_PORT}
 HEALTHCHECK CMD curl --fail http://localhost:${OBSERVER_SL_PORT}/_stcore/health
-CMD python3 run_fetcher.py & streamlit run run_app.py --server.address=0.0.0.0 --server.port=${OBSERVER_SL_PORT} --browser.gatherUsageStats=false
+CMD streamlit run run_app.py --server.address=0.0.0.0 --server.port=${OBSERVER_SL_PORT} --browser.gatherUsageStats=false
