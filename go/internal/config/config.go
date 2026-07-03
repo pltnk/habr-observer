@@ -1,7 +1,8 @@
 // Package config loads the application's configuration from OBSERVER_*
 // environment variables, applying defaults and validating the result. Call
-// [Load] once at startup: it reads secrets from the environment and then
-// unsets them, so it is not meant to be called more than once.
+// [Load] (the updater) or [LoadServer] (the read server) once at startup:
+// both read secrets from the environment and then unset them, so neither is
+// meant to be called more than once.
 package config
 
 import (
@@ -14,35 +15,36 @@ import (
 
 // Environment variable names.
 const (
-	envMongoUser     = "OBSERVER_MONGO_USER"
-	envMongoPass     = "OBSERVER_MONGO_PASS"
-	envMongoHost     = "OBSERVER_MONGO_HOST"
-	envMongoDB       = "OBSERVER_MONGO_DB"
-	envMongoArticles = "OBSERVER_MONGO_ARTICLES"
-	envMongoFeeds    = "OBSERVER_MONGO_FEEDS"
-	envAuthToken     = "OBSERVER_AUTH_TOKEN"
-	envUpdateTimeout = "OBSERVER_FEED_UPDATE_TIMEOUT"
-	envCacheTTL      = "OBSERVER_FEED_CACHE_TTL"
-	envServerAddr    = "OBSERVER_SERVER_ADDR"
+	envMongoUser      = "OBSERVER_MONGO_USER"
+	envMongoPass      = "OBSERVER_MONGO_PASS"
+	envMongoHost      = "OBSERVER_MONGO_HOST"
+	envMongoDB        = "OBSERVER_MONGO_DB"
+	envMongoArticles  = "OBSERVER_MONGO_ARTICLES"
+	envMongoFeeds     = "OBSERVER_MONGO_FEEDS"
+	envAuthToken      = "OBSERVER_AUTH_TOKEN"
+	envUpdateInterval = "OBSERVER_FEED_UPDATE_INTERVAL"
+	envUpdateTimeout  = "OBSERVER_FEED_UPDATE_TIMEOUT"
+	envCacheTTL       = "OBSERVER_FEED_CACHE_TTL"
+	envServerAddr     = "OBSERVER_SERVER_ADDR"
 )
 
 // Defaults applied when the corresponding variable is unset.
 const (
-	defMongoUser         = "default"
-	defMongoPass         = "default"
-	defMongoHost         = "db"
-	defMongoDB           = "observer"
-	defMongoArticles     = "articles"
-	defMongoFeeds        = "feeds"
-	defUpdateTimeoutSecs = 600
-	defCacheTTLSecs      = 60
-	defServerAddr        = ":8080"
+	defMongoUser          = "default"
+	defMongoPass          = "default"
+	defMongoHost          = "db"
+	defMongoDB            = "observer"
+	defMongoArticles      = "articles"
+	defMongoFeeds         = "feeds"
+	defUpdateIntervalSecs = 600
+	defUpdateTimeoutSecs  = 600
+	defCacheTTLSecs       = 60
+	defServerAddr         = ":8080"
 )
 
 // MongoConfig holds the connection parts for MongoDB. Credentials are kept
-// separate rather than pre-assembled into a URI; the repository hands them to
-// the driver's auth options at the connection boundary, so the password never
-// lands in a connection string.
+// separate rather than pre-assembled into a URI, so the password never lands
+// in a connection string.
 type MongoConfig struct {
 	Host         string
 	User         string
@@ -52,13 +54,15 @@ type MongoConfig struct {
 	FeedsColl    string
 }
 
-// FeedRuntimeConfig holds the feed updater's timing parameters.
+// FeedRuntimeConfig holds the feed updater's timing parameters. UpdateInterval
+// is the cadence between cycle starts; UpdateTimeout is each cycle's hard
+// deadline.
 type FeedRuntimeConfig struct {
-	UpdateTimeout time.Duration
-	CacheTTL      time.Duration
+	UpdateInterval time.Duration
+	UpdateTimeout  time.Duration
 }
 
-// Config is the fully resolved application configuration.
+// Config is the updater's fully resolved configuration.
 type Config struct {
 	AuthToken   string
 	FeedRuntime FeedRuntimeConfig
@@ -72,15 +76,16 @@ func (c *Config) validate() error {
 	if c.AuthToken == "" {
 		errs = append(errs, fmt.Errorf("%s must be set", envAuthToken))
 	}
+	if c.FeedRuntime.UpdateInterval <= 0 {
+		errs = append(errs, fmt.Errorf("%s must be positive", envUpdateInterval))
+	}
 	if c.FeedRuntime.UpdateTimeout <= 0 {
 		errs = append(errs, fmt.Errorf("%s must be positive", envUpdateTimeout))
-	}
-	if c.FeedRuntime.CacheTTL <= 0 {
-		errs = append(errs, fmt.Errorf("%s must be positive", envCacheTTL))
 	}
 	return errors.Join(errs...)
 }
 
+// getEnv returns key's value, or fallback if the variable is unset or empty.
 func getEnv(key, fallback string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
@@ -88,9 +93,9 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
-// getEnvInt returns key as an int, or fallback if unset. If the variable is
-// set but not a valid integer it returns an error, so a typo fails at startup
-// instead of silently using the default.
+// getEnvInt returns key as an int, or fallback if the variable is unset or
+// empty. A set but non-integer value returns an error, so a typo fails at
+// startup instead of silently using the default.
 func getEnvInt(key string, fallback int) (int, error) {
 	value := os.Getenv(key)
 	if value == "" {
@@ -104,8 +109,8 @@ func getEnvInt(key string, fallback int) (int, error) {
 }
 
 // getEnvOnce reads key, then removes it from the process environment so the
-// secret cannot be re-read via os.Getenv or leaked through os.Environ. As a
-// result Load is not idempotent for secrets: a second call sees the fallback.
+// secret cannot be re-read via os.Getenv or leaked through os.Environ. A
+// second read of the same key therefore sees the fallback.
 func getEnvOnce(key, fallback string) string {
 	value := getEnv(key, fallback)
 	os.Unsetenv(key)
@@ -126,15 +131,16 @@ func loadMongo() MongoConfig {
 	}
 }
 
-// Load reads configuration from the environment, applies defaults, and
-// validates it, returning an error if a value is malformed or a required value
-// is missing.
+// Load reads the updater's configuration from the environment, applies
+// defaults, and validates it, returning an error if a value is malformed or a
+// required value is missing. It scrubs secrets after reading, so call it at
+// most once per process.
 func Load() (*Config, error) {
-	updateSecs, err := getEnvInt(envUpdateTimeout, defUpdateTimeoutSecs)
+	intervalSecs, err := getEnvInt(envUpdateInterval, defUpdateIntervalSecs)
 	if err != nil {
 		return nil, err
 	}
-	cacheSecs, err := getEnvInt(envCacheTTL, defCacheTTLSecs)
+	timeoutSecs, err := getEnvInt(envUpdateTimeout, defUpdateTimeoutSecs)
 	if err != nil {
 		return nil, err
 	}
@@ -142,8 +148,8 @@ func Load() (*Config, error) {
 	cfg := &Config{
 		AuthToken: getEnvOnce(envAuthToken, ""), // no default: must be provided
 		FeedRuntime: FeedRuntimeConfig{
-			UpdateTimeout: time.Duration(updateSecs) * time.Second,
-			CacheTTL:      time.Duration(cacheSecs) * time.Second,
+			UpdateInterval: time.Duration(intervalSecs) * time.Second,
+			UpdateTimeout:  time.Duration(timeoutSecs) * time.Second,
 		},
 		Mongo: loadMongo(),
 	}
@@ -154,9 +160,8 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-// ServerConfig is the read-side HTTP server's resolved configuration. The server
-// reads feeds from MongoDB and serves them cached, so unlike the updater it
-// needs no summarization token — [LoadServer] does not require OBSERVER_AUTH_TOKEN.
+// ServerConfig is the read-side HTTP server's resolved configuration. Unlike
+// the updater's [Config], it requires no summarization token.
 type ServerConfig struct {
 	Addr     string
 	CacheTTL time.Duration
@@ -164,8 +169,8 @@ type ServerConfig struct {
 }
 
 // LoadServer reads the read-side server's configuration from the environment,
-// applies defaults, and validates it. Like [Load] it scrubs Mongo secrets after
-// reading, so it is not meant to be called more than once.
+// applies defaults, and validates it. It scrubs secrets after reading, so call
+// it at most once per process.
 func LoadServer() (*ServerConfig, error) {
 	cacheSecs, err := getEnvInt(envCacheTTL, defCacheTTLSecs)
 	if err != nil {

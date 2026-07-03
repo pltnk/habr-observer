@@ -8,11 +8,12 @@ import (
 	"time"
 )
 
-// allEnvKeys is every variable Load reads. setEnv neutralizes all of them so a
-// test is hermetic regardless of the developer's real environment.
+// allEnvKeys is every variable the loaders read. setEnv neutralizes all of them
+// so a test is hermetic regardless of the developer's real environment.
 var allEnvKeys = []string{
 	envMongoUser, envMongoPass, envMongoHost, envMongoDB, envMongoArticles,
-	envMongoFeeds, envAuthToken, envUpdateTimeout, envCacheTTL, envServerAddr,
+	envMongoFeeds, envAuthToken, envUpdateInterval, envUpdateTimeout, envCacheTTL,
+	envServerAddr,
 }
 
 // setEnv sets every OBSERVER_* variable for the duration of the test (restored
@@ -40,8 +41,8 @@ func TestLoad_Defaults(t *testing.T) {
 	want := &Config{
 		AuthToken: "tok",
 		FeedRuntime: FeedRuntimeConfig{
-			UpdateTimeout: defUpdateTimeoutSecs * time.Second,
-			CacheTTL:      defCacheTTLSecs * time.Second,
+			UpdateInterval: defUpdateIntervalSecs * time.Second,
+			UpdateTimeout:  defUpdateTimeoutSecs * time.Second,
 		},
 		Mongo: MongoConfig{
 			Host:         defMongoHost,
@@ -59,15 +60,15 @@ func TestLoad_Defaults(t *testing.T) {
 
 func TestLoad_Overrides(t *testing.T) {
 	setEnv(t, map[string]string{
-		envMongoUser:     "alice",
-		envMongoPass:     "secret",
-		envMongoHost:     "mongo.example.com:27018",
-		envMongoDB:       "obsdb",
-		envMongoArticles: "arts",
-		envMongoFeeds:    "fds",
-		envAuthToken:     "xyz-token",
-		envUpdateTimeout: "120",
-		envCacheTTL:      "30",
+		envMongoUser:      "alice",
+		envMongoPass:      "secret",
+		envMongoHost:      "mongo.example.com:27018",
+		envMongoDB:        "obsdb",
+		envMongoArticles:  "arts",
+		envMongoFeeds:     "fds",
+		envAuthToken:      "xyz-token",
+		envUpdateInterval: "300",
+		envUpdateTimeout:  "120",
 	})
 
 	got, err := Load()
@@ -78,8 +79,8 @@ func TestLoad_Overrides(t *testing.T) {
 	want := &Config{
 		AuthToken: "xyz-token",
 		FeedRuntime: FeedRuntimeConfig{
-			UpdateTimeout: 120 * time.Second,
-			CacheTTL:      30 * time.Second,
+			UpdateInterval: 300 * time.Second,
+			UpdateTimeout:  120 * time.Second,
 		},
 		Mongo: MongoConfig{
 			Host:         "mongo.example.com:27018",
@@ -183,14 +184,19 @@ func TestLoad_Errors(t *testing.T) {
 			want: []string{envAuthToken},
 		},
 		{
+			name: "invalid_update_interval",
+			env:  map[string]string{envAuthToken: "tok", envUpdateInterval: "soon"},
+			want: []string{envUpdateInterval},
+		},
+		{
+			name: "zero_update_interval",
+			env:  map[string]string{envAuthToken: "tok", envUpdateInterval: "0"},
+			want: []string{envUpdateInterval},
+		},
+		{
 			name: "invalid_update_timeout",
 			env:  map[string]string{envAuthToken: "tok", envUpdateTimeout: "sixty"},
 			want: []string{envUpdateTimeout},
-		},
-		{
-			name: "invalid_cache_ttl",
-			env:  map[string]string{envAuthToken: "tok", envCacheTTL: "1m"},
-			want: []string{envCacheTTL},
 		},
 		{
 			name: "zero_update_timeout",
@@ -198,16 +204,11 @@ func TestLoad_Errors(t *testing.T) {
 			want: []string{envUpdateTimeout},
 		},
 		{
-			name: "negative_cache_ttl",
-			env:  map[string]string{envAuthToken: "tok", envCacheTTL: "-5"},
-			want: []string{envCacheTTL},
-		},
-		{
-			// All three are valid integers, so they reach validate() and must
-			// be reported together via errors.Join.
+			// Both parse as integers, so they reach validate() and must be
+			// reported together with the missing token via errors.Join.
 			name: "aggregates_all_validation_errors",
-			env:  map[string]string{envUpdateTimeout: "0", envCacheTTL: "-5"},
-			want: []string{envAuthToken, envUpdateTimeout, envCacheTTL},
+			env:  map[string]string{envUpdateInterval: "0", envUpdateTimeout: "0"},
+			want: []string{envAuthToken, envUpdateInterval, envUpdateTimeout},
 		},
 	}
 
@@ -257,7 +258,7 @@ func TestValidate(t *testing.T) {
 	newValid := func() *Config {
 		return &Config{
 			AuthToken:   "tok",
-			FeedRuntime: FeedRuntimeConfig{UpdateTimeout: time.Second, CacheTTL: time.Second},
+			FeedRuntime: FeedRuntimeConfig{UpdateInterval: time.Second, UpdateTimeout: time.Second},
 		}
 	}
 
@@ -268,16 +269,16 @@ func TestValidate(t *testing.T) {
 	}{
 		{name: "valid", mutate: func(*Config) {}, wantErr: nil},
 		{name: "missing_auth", mutate: func(c *Config) { c.AuthToken = "" }, wantErr: []string{envAuthToken}},
+		{name: "zero_update_interval", mutate: func(c *Config) { c.FeedRuntime.UpdateInterval = 0 }, wantErr: []string{envUpdateInterval}},
 		{name: "zero_update_timeout", mutate: func(c *Config) { c.FeedRuntime.UpdateTimeout = 0 }, wantErr: []string{envUpdateTimeout}},
-		{name: "negative_cache_ttl", mutate: func(c *Config) { c.FeedRuntime.CacheTTL = -time.Second }, wantErr: []string{envCacheTTL}},
 		{
 			name: "all_invalid",
 			mutate: func(c *Config) {
 				c.AuthToken = ""
+				c.FeedRuntime.UpdateInterval = 0
 				c.FeedRuntime.UpdateTimeout = 0
-				c.FeedRuntime.CacheTTL = 0
 			},
-			wantErr: []string{envAuthToken, envUpdateTimeout, envCacheTTL},
+			wantErr: []string{envAuthToken, envUpdateInterval, envUpdateTimeout},
 		},
 	}
 
