@@ -31,20 +31,20 @@ const (
 // An UpdateFeedUsecase must be created with [NewUpdateFeedUsecase]; the zero
 // value is not usable.
 type UpdateFeedUsecase struct {
-	feeds   FeedClient
-	summary SummaryClient
-	repo    Repository
-	log     *slog.Logger
+	feeds      FeedClient
+	summarizer SummaryClient
+	repo       Repository
+	log        *slog.Logger
 }
 
 // NewUpdateFeedUsecase returns a use case backed by the given ports. If log is
 // nil, [slog.Default] is used.
-func NewUpdateFeedUsecase(feeds FeedClient, summary SummaryClient, repo Repository, log *slog.Logger) *UpdateFeedUsecase {
+func NewUpdateFeedUsecase(feeds FeedClient, summarizer SummaryClient, repo Repository, log *slog.Logger) *UpdateFeedUsecase {
 	if log == nil {
 		log = slog.Default()
 	}
 
-	return &UpdateFeedUsecase{feeds: feeds, summary: summary, repo: repo, log: log}
+	return &UpdateFeedUsecase{feeds: feeds, summarizer: summarizer, repo: repo, log: log}
 }
 
 // Execute refreshes one feed: fetch its current articles, determine which are
@@ -168,7 +168,7 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 // yields the stored placeholder. Any other error is transient: it is returned so
 // the caller skips the article and a later run can retry it.
 func (u *UpdateFeedUsecase) summarize(ctx context.Context, a *domain.Article) (*domain.Summary, error) {
-	summary, err := u.summary.GetSummary(ctx, a.ID)
+	summary, err := u.summarizer.GetSummary(ctx, a.ID)
 
 	if errors.Is(err, yagpt.ErrSummaryUnavailable) {
 		return &domain.Summary{

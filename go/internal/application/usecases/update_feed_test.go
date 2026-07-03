@@ -294,9 +294,9 @@ func TestUpdateFeedUsecase_Execute_BuildsSnapshotInFeedOrder(t *testing.T) {
 
 	feeds := feedWith(art(aID), art(bID), art(cID))
 	repo := &fakeRepo{present: []*domain.Article{storedArt(bID)}} // b already stored
-	summary := &fakeSummaryClient{}
+	summarizer := &fakeSummaryClient{}
 
-	uc := NewUpdateFeedUsecase(feeds, summary, repo, quietLogger())
+	uc := NewUpdateFeedUsecase(feeds, summarizer, repo, quietLogger())
 	if err := uc.Execute(context.Background(), habr.FeedDaily); err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
@@ -321,7 +321,7 @@ func TestUpdateFeedUsecase_Execute_BuildsSnapshotInFeedOrder(t *testing.T) {
 	}
 
 	// The stored article was not re-summarized; the new ones were.
-	called := summary.calledURLs()
+	called := summarizer.calledURLs()
 	if slices.Contains(called, bID) {
 		t.Fatalf("summary client was called for the already-stored article %q", bID)
 	}
@@ -357,14 +357,14 @@ func TestUpdateFeedUsecase_Execute_SkipsAlreadyStored(t *testing.T) {
 
 	feeds := feedWith(art(aID), art(bID))
 	repo := &fakeRepo{present: []*domain.Article{storedArt(aID), storedArt(bID)}}
-	summary := &fakeSummaryClient{}
+	summarizer := &fakeSummaryClient{}
 
-	uc := NewUpdateFeedUsecase(feeds, summary, repo, quietLogger())
+	uc := NewUpdateFeedUsecase(feeds, summarizer, repo, quietLogger())
 	if err := uc.Execute(context.Background(), habr.FeedDaily); err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
 
-	if got := summary.calledURLs(); len(got) != 0 {
+	if got := summarizer.calledURLs(); len(got) != 0 {
 		t.Fatalf("summary client called for %v, want no calls", got)
 	}
 	if got := len(repo.upsertedArticles); got != 0 {
@@ -382,9 +382,9 @@ func TestUpdateFeedUsecase_Execute_StoresPlaceholderForUnavailable(t *testing.T)
 
 	feeds := feedWith(art(aID))
 	repo := &fakeRepo{}
-	summary := &fakeSummaryClient{urlErr: map[string]error{aID: yagpt.ErrSummaryUnavailable}}
+	summarizer := &fakeSummaryClient{urlErr: map[string]error{aID: yagpt.ErrSummaryUnavailable}}
 
-	uc := NewUpdateFeedUsecase(feeds, summary, repo, quietLogger())
+	uc := NewUpdateFeedUsecase(feeds, summarizer, repo, quietLogger())
 	if err := uc.Execute(context.Background(), habr.FeedDaily); err != nil {
 		t.Fatalf("Execute: %v", err)
 	}
@@ -427,9 +427,9 @@ func TestUpdateFeedUsecase_Execute_SkipsFailedArticle(t *testing.T) {
 
 			feeds := feedWith(art(badID), art(goodID))
 			repo := &fakeRepo{}
-			summary := &fakeSummaryClient{urlErr: map[string]error{badID: tc.err}}
+			summarizer := &fakeSummaryClient{urlErr: map[string]error{badID: tc.err}}
 
-			uc := NewUpdateFeedUsecase(feeds, summary, repo, quietLogger())
+			uc := NewUpdateFeedUsecase(feeds, summarizer, repo, quietLogger())
 			if err := uc.Execute(context.Background(), habr.FeedDaily); err != nil {
 				t.Fatalf("Execute: %v", err)
 			}
@@ -452,9 +452,9 @@ func TestUpdateFeedUsecase_Execute_RecoversFromSummaryPanic(t *testing.T) {
 
 	feeds := feedWith(art(panicID), art(goodID))
 	repo := &fakeRepo{}
-	summary := &fakeSummaryClient{panicURL: map[string]bool{panicID: true}}
+	summarizer := &fakeSummaryClient{panicURL: map[string]bool{panicID: true}}
 
-	uc := NewUpdateFeedUsecase(feeds, summary, repo, quietLogger())
+	uc := NewUpdateFeedUsecase(feeds, summarizer, repo, quietLogger())
 	if err := uc.Execute(context.Background(), habr.FeedDaily); err != nil { // recovered, so no crash
 		t.Fatalf("Execute: %v", err)
 	}
@@ -476,9 +476,9 @@ func TestUpdateFeedUsecase_Execute_NoGoroutineLeak(t *testing.T) {
 	blockID := "https://habr.com/blocking/"
 
 	feeds := feedWith(art(blockID))
-	summary := &fakeSummaryClient{blockURL: map[string]bool{blockID: true}}
+	summarizer := &fakeSummaryClient{blockURL: map[string]bool{blockID: true}}
 
-	uc := NewUpdateFeedUsecase(feeds, summary, &fakeRepo{}, quietLogger())
+	uc := NewUpdateFeedUsecase(feeds, summarizer, &fakeRepo{}, quietLogger())
 
 	before := runtime.NumGoroutine()
 

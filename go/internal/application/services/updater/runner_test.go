@@ -9,46 +9,46 @@ import (
 
 // --- fakes -------------------------------------------------------------------
 
-// fakeCycler records each UpdateAllFeeds call and signals on a channel so tests
+// fakeUpdater records each UpdateAllFeeds call and signals on a channel so tests
 // can await a precise number of cycles without sleeping.
-type fakeCycler struct {
+type fakeUpdater struct {
 	mu        sync.Mutex
 	calls     int
 	deadlines int // calls whose ctx carried a deadline
 	signal    chan struct{}
 }
 
-func (c *fakeCycler) UpdateAllFeeds(ctx context.Context) error {
-	c.mu.Lock()
-	c.calls++
+func (u *fakeUpdater) UpdateAllFeeds(ctx context.Context) error {
+	u.mu.Lock()
+	u.calls++
 	if _, ok := ctx.Deadline(); ok {
-		c.deadlines++
+		u.deadlines++
 	}
-	c.mu.Unlock()
-	if c.signal != nil {
-		c.signal <- struct{}{}
+	u.mu.Unlock()
+	if u.signal != nil {
+		u.signal <- struct{}{}
 	}
 	return nil
 }
 
-func (c *fakeCycler) count() int {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.calls
+func (u *fakeUpdater) count() int {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return u.calls
 }
 
-func (c *fakeCycler) deadlineCount() int {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	return c.deadlines
+func (u *fakeUpdater) deadlineCount() int {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return u.deadlines
 }
 
-// blockingCycler's cycle never returns until release is closed, simulating a
+// blockingUpdater's cycle never returns until release is closed, simulating a
 // feed pipeline wedged past its deadline (a dependency that ignores ctx).
-type blockingCycler struct{ release chan struct{} }
+type blockingUpdater struct{ release chan struct{} }
 
-func (c *blockingCycler) UpdateAllFeeds(context.Context) error {
-	<-c.release
+func (u *blockingUpdater) UpdateAllFeeds(context.Context) error {
+	<-u.release
 	return nil
 }
 
@@ -57,9 +57,9 @@ func (c *blockingCycler) UpdateAllFeeds(context.Context) error {
 func TestRunner_RunsImmediatelyThenOnInterval(t *testing.T) {
 	t.Parallel()
 
-	cyc := &fakeCycler{signal: make(chan struct{}, 64)}
+	upd := &fakeUpdater{signal: make(chan struct{}, 64)}
 	// A long stall timeout so the watchdog never fires during this test.
-	r := NewRunner(cyc, 5*time.Millisecond, 50*time.Millisecond, time.Hour, quietLogger(), func() {})
+	r := NewRunner(upd, 5*time.Millisecond, 50*time.Millisecond, time.Hour, quietLogger(), func() {})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -73,7 +73,7 @@ func TestRunner_RunsImmediatelyThenOnInterval(t *testing.T) {
 	// First cycle is immediate; the second proves the interval ticker fired.
 	for i := range 2 {
 		select {
-		case <-cyc.signal:
+		case <-upd.signal:
 		case <-time.After(2 * time.Second):
 			t.Fatalf("cycle %d did not run", i+1)
 		}
@@ -81,20 +81,20 @@ func TestRunner_RunsImmediatelyThenOnInterval(t *testing.T) {
 	cancel()
 	<-done // Run has returned, so the counts below are stable
 
-	if cyc.count() < 2 {
-		t.Fatalf("cycles = %d, want >= 2", cyc.count())
+	if upd.count() < 2 {
+		t.Fatalf("cycles = %d, want >= 2", upd.count())
 	}
 	// Every cycle ran under a per-cycle deadline.
-	if got := cyc.deadlineCount(); got != cyc.count() {
-		t.Fatalf("cycles with a deadline = %d, want %d (all of them)", got, cyc.count())
+	if got := upd.deadlineCount(); got != upd.count() {
+		t.Fatalf("cycles with a deadline = %d, want %d (all of them)", got, upd.count())
 	}
 }
 
 func TestRunner_StopsOnContextCancel(t *testing.T) {
 	t.Parallel()
 
-	cyc := &fakeCycler{}
-	r := NewRunner(cyc, time.Hour, time.Hour, time.Hour, quietLogger(), func() {})
+	upd := &fakeUpdater{}
+	r := NewRunner(upd, time.Hour, time.Hour, time.Hour, quietLogger(), func() {})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // canceled before Run starts
@@ -111,7 +111,7 @@ func TestRunner_StopsOnContextCancel(t *testing.T) {
 		t.Fatal("Run did not return after context cancel")
 	}
 	// The immediate first cycle still ran; the long interval never fired.
-	if got := cyc.count(); got != 1 {
+	if got := upd.count(); got != 1 {
 		t.Fatalf("cycles = %d, want exactly 1 (the immediate run)", got)
 	}
 }
@@ -123,14 +123,14 @@ func TestRunner_ExitsOnStall(t *testing.T) {
 	t.Parallel()
 
 	release := make(chan struct{})
-	cyc := &blockingCycler{release: release}
+	upd := &blockingUpdater{release: release}
 
 	var once sync.Once
 	stalled := make(chan struct{})
 	onStall := func() { once.Do(func() { close(stalled) }) }
 
 	// Tiny stall timeout so the wedged first cycle trips the watchdog quickly.
-	r := NewRunner(cyc, time.Hour, time.Hour, 20*time.Millisecond, quietLogger(), onStall)
+	r := NewRunner(upd, time.Hour, time.Hour, 20*time.Millisecond, quietLogger(), onStall)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan struct{})

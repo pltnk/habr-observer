@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-// cycler runs one update cycle. *Service satisfies it; the Runner depends on the
+// updater runs one update cycle. *Service satisfies it; the Runner depends on the
 // interface so the loop can be tested without the feed pipeline.
-type cycler interface {
+type updater interface {
 	UpdateAllFeeds(ctx context.Context) error
 }
 
@@ -23,7 +23,7 @@ type cycler interface {
 // restart-on-exit supervisor. If no cycle completes within stallTimeout, onStall
 // fires — in production, exiting so the supervisor restarts it.
 type Runner struct {
-	svc          cycler
+	svc          updater
 	interval     time.Duration
 	deadline     time.Duration
 	stallTimeout time.Duration
@@ -35,7 +35,7 @@ type Runner struct {
 // each cycle's hard timeout, and stallTimeout the longest gap between completed
 // cycles before onStall fires. If log is nil, [slog.Default] is used; if onStall
 // is nil, it exits the process with status 1.
-func NewRunner(svc cycler, interval, deadline, stallTimeout time.Duration, log *slog.Logger, onStall func()) *Runner {
+func NewRunner(svc updater, interval, deadline, stallTimeout time.Duration, log *slog.Logger, onStall func()) *Runner {
 	if log == nil {
 		log = slog.Default()
 	}
