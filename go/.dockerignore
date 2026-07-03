@@ -1,0 +1,5 @@
+.dockerignore
+build/
+**/*_test.go
+**/testdata/
+**/.DS_Store
