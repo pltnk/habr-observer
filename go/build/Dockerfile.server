@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+
+# ---- build ----
+# Build natively and cross-compile to the target, so building a linux/amd64
+# image on an arm64 host needs no emulation.
+FROM --platform=$BUILDPLATFORM golang:1.26 AS build
+WORKDIR /src
+
+# Target platform, filled in by BuildKit; drives the cross-compile below.
+ARG TARGETOS TARGETARCH
+
+# Separate module download so it is cached until go.mod/go.sum change.
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+COPY . .
+
+# Static, stripped binary: CGO off so it needs no libc and runs on
+# distroless/static. Cache mounts persist the module and build caches.
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
+    go build -trimpath -ldflags="-s -w" -o /out/server ./cmd/server
+
+# ---- runtime ----
+# distroless/static has no shell or package manager. The server only reaches
+# MongoDB on the internal network, so it needs no outbound certificates.
+FROM gcr.io/distroless/static-debian13:nonroot
+COPY --from=build /out/server /usr/local/bin/server
+EXPOSE 8080
+USER nonroot:nonroot
+ENTRYPOINT ["/usr/local/bin/server"]
