@@ -105,20 +105,8 @@ body {
   margin-block: 6px;
 }
 
-/* Streamlit's expander label highlighted on hover — match the article link
-   rows: muted at rest, link-hover color on hover. */
 .theses-disclosure {
   margin-block: 12px;
-  --g-disclosure-text-color: var(--g-color-text-secondary);
-}
-
-.theses-disclosure .g-disclosure__trigger:hover {
-  color: var(--g-color-text-link-hover);
-}
-
-/* Comfortable touch target for the disclosure trigger. */
-.theses-disclosure .g-disclosure__trigger {
-  min-height: 44px;
 }
 
 /* Paired links: the ~2em gap matches the original's &emsp;&emsp;, and
