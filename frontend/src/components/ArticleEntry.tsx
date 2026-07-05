@@ -1,5 +1,13 @@
-import { FaceRobotSmile, SquareArticle } from "@gravity-ui/icons";
-import { Divider, Flex, HelpMark, Icon, Link, Text } from "@gravity-ui/uikit";
+import { CircleInfo } from "@gravity-ui/icons";
+import {
+  Button,
+  Divider,
+  Flex,
+  Icon,
+  Link,
+  Popover,
+  Text,
+} from "@gravity-ui/uikit";
 
 import type { Article } from "../types";
 import { SummaryTheses } from "./SummaryTheses";
@@ -21,32 +29,67 @@ interface ArticleEntryProps {
 }
 
 export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
+  const info = (
+    <div className="article-info-popover">
+      {article.author !== "" && (
+        <div>
+          Автор:{" "}
+          <Link
+            href={`https://habr.com/ru/users/${encodeURIComponent(article.author)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {article.author}
+          </Link>
+        </div>
+      )}
+      <div>
+        Дата публикации: {pubDateFormat.format(new Date(article.pub_date))}{" "}
+        (UTC)
+      </div>
+      {article.summary !== null && (
+        <div>
+          Пересказ:{" "}
+          <Link
+            href={article.summary.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            300.ya.ru
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <article className="article">
       <Flex alignItems="center" gap={2} className="article-title">
         <Text as="h3" variant="subheader-3">
-          {article.title}
+          <Link
+            view="primary"
+            visitable
+            href={article.id}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {article.title}
+          </Link>
         </Text>
-        {/* safePolygon keeps the popover open while the pointer travels to
-            the author link inside it. */}
-        <HelpMark popoverProps={{ enableSafePolygon: true }}>
-          {article.author !== "" && (
-            <div>
-              Автор:{" "}
-              <Link
-                href={`https://habr.com/ru/users/${encodeURIComponent(article.author)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {article.author}
-              </Link>
-            </div>
-          )}
-          <div>
-            Дата публикации: {pubDateFormat.format(new Date(article.pub_date))}{" "}
-            (UTC)
-          </div>
-        </HelpMark>
+        {/* HelpMark's icon is hardcoded, so this is its Popover-plus-button
+            shape with a CircleInfo glyph; safePolygon keeps the popover open
+            while the pointer travels to the links inside. */}
+        <Popover content={info} hasArrow enableSafePolygon>
+          <Button
+            view="flat-secondary"
+            size="s"
+            pin="circle-circle"
+            aria-label="Сведения о статье"
+            className="article-info"
+          >
+            <Icon data={CircleInfo} size={16} />
+          </Button>
+        </Popover>
       </Flex>
       {article.summary !== null && (
         <SummaryTheses
@@ -54,33 +97,6 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
           collapsed={collapsed}
         />
       )}
-      <Text
-        as="div"
-        variant="caption-2"
-        color="secondary"
-        className="links-row"
-      >
-        {article.summary !== null && (
-          <Link
-            view="secondary"
-            href={article.summary.url}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon data={FaceRobotSmile} size={16} />
-            Ссылка на пересказ
-          </Link>
-        )}
-        <Link
-          view="secondary"
-          href={article.id}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Icon data={SquareArticle} size={16} />
-          Открыть оригинал
-        </Link>
-      </Text>
       <Divider className="article-divider" />
     </article>
   );
