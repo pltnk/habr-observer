@@ -4,8 +4,12 @@
 # Python bytecode cache from a local run of the frontend.
 __pycache__/
 
-# Claude Code per-machine settings.
-.claude/settings.local.json
+# Claude Code settings.
+.claude
 
 # macOS Finder metadata.
 .DS_Store
+
+# Zed settings.
+.zed
+.ropeproject
