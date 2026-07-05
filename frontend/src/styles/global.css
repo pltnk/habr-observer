@@ -94,10 +94,24 @@ body {
   min-width: 0;
 }
 
+/* Icon-labelled meta rows inside the title info popover. */
 .article-info-popover {
   padding: var(--g-spacing-3);
 }
 
+.article-info-popover > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.article-info-popover > div + div {
+  margin-top: 4px;
+}
+
+.article-info-popover .g-icon {
+  color: var(--g-color-text-secondary);
+}
 
 .theses {
   margin-block: 12px;

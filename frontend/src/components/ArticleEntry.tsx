@@ -1,4 +1,9 @@
-import { CircleInfo } from "@gravity-ui/icons";
+import {
+  Calendar,
+  CircleInfo,
+  FaceRobotSmile,
+  Person,
+} from "@gravity-ui/icons";
 import {
   Button,
   Divider,
@@ -33,7 +38,7 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
     <div className="article-info-popover">
       {article.author !== "" && (
         <div>
-          Автор:{" "}
+          <Icon data={Person} size={16} />
           <Link
             href={`https://habr.com/ru/users/${encodeURIComponent(article.author)}`}
             target="_blank"
@@ -44,18 +49,18 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
         </div>
       )}
       <div>
-        Дата публикации: {pubDateFormat.format(new Date(article.pub_date))}{" "}
-        (UTC)
+        <Icon data={Calendar} size={16} />
+        <span>{pubDateFormat.format(new Date(article.pub_date))} (UTC)</span>
       </div>
       {article.summary !== null && (
         <div>
-          Пересказ:{" "}
+          <Icon data={FaceRobotSmile} size={16} />
           <Link
             href={article.summary.url}
             target="_blank"
             rel="noopener noreferrer"
           >
-            300.ya.ru
+            Ссылка на пересказ
           </Link>
         </div>
       )}
