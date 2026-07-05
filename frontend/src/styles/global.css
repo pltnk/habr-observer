@@ -4,6 +4,27 @@ body {
   margin: 0;
 }
 
+/* Typography restored to the original Streamlit app — values extracted from
+   the live site's computed styles: Source Sans Pro, 16px body at 1.6,
+   44/36/28 heading scale (700/600/600), 14px captions. Token-level
+   overrides — the same mechanism Gravity's themer exports. */
+.g-root {
+  --g-font-family-sans: "Source Sans Pro", sans-serif;
+  --g-text-display-font-weight: 700;
+  --g-text-display-3-font-size: 44px;
+  --g-text-display-3-line-height: 52.8px;
+  --g-text-subheader-2-font-size: 36px;
+  --g-text-subheader-2-line-height: 43.2px;
+  --g-text-subheader-3-font-size: 28px;
+  --g-text-subheader-3-line-height: 33.6px;
+  --g-text-body-1-font-size: 14px;
+  --g-text-body-1-line-height: 22.4px;
+  --g-text-body-2-font-size: 16px;
+  --g-text-body-2-line-height: 25.6px;
+  --g-text-caption-2-font-size: 14px;
+  --g-text-caption-2-line-height: 22.4px;
+}
+
 /* One centered, fluid content column — the original's geometry: 736 px max
    width and 16 px side padding at every viewport width. */
 .page {

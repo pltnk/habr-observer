@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fontsource/inter": "^5.2.8",
+    "@fontsource/source-sans-pro": "^5.2.5",
     "@gravity-ui/icons": "2.20.0",
     "@gravity-ui/uikit": "7.43.0",
     "react": "^19.2.7",

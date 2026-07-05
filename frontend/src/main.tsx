@@ -1,8 +1,9 @@
-// Inter is self-hosted (cyrillic subsets included) and must load before
-// uikit's styles; uikit's own fonts.css is a render-blocking Google Fonts
-// @import and is deliberately not used.
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/600.css";
+// Source Sans Pro — the original Streamlit app's font — self-hosted with
+// cyrillic subsets, loaded before uikit's styles; uikit's own fonts.css is a
+// render-blocking Google Fonts @import and is deliberately not used.
+import "@fontsource/source-sans-pro/400.css";
+import "@fontsource/source-sans-pro/600.css";
+import "@fontsource/source-sans-pro/700.css";
 import "@gravity-ui/uikit/styles/styles.css";
 import "./styles/global.css";
 
