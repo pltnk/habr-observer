@@ -1,0 +1,78 @@
+// Package updater runs the periodic worker that refreshes every Habr feed on a
+// fixed interval. Feeds are refreshed one at a time: the rate-limited summary
+// service is the throughput bottleneck, so concurrency would not help. A stall
+// watchdog exits the process if a cycle wedges, so a supervisor can restart it.
+package updater
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"runtime/debug"
+
+	"habr-observer/internal/infrastructure/habr"
+)
+
+// feedUpdater refreshes a single feed. *usecases.UpdateFeedUsecase satisfies it;
+// Service depends on the interface so its tests can drive it with a fake.
+type feedUpdater interface {
+	Execute(ctx context.Context, f habr.RSSFeed) error
+}
+
+// Service refreshes every Habr feed once per cycle, sequentially. It holds no
+// per-cycle state, so one instance may be reused and is safe for concurrent use
+// if its dependencies are.
+type Service struct {
+	updater feedUpdater
+	log     *slog.Logger
+}
+
+// NewService returns a [Service]. If log is nil, [slog.Default] is used.
+func NewService(updater feedUpdater, log *slog.Logger) *Service {
+	if log == nil {
+		log = slog.Default()
+	}
+	return &Service{updater: updater, log: log}
+}
+
+// UpdateAllFeeds refreshes every Habr feed sequentially, isolating each: a real
+// failure or panic is logged and collected but never aborts the rest, and
+// cancellation is suppressed. It returns the joined per-feed failures, or nil if
+// none occurred.
+func (s *Service) UpdateAllFeeds(ctx context.Context) error {
+	var errs []error
+
+	for _, f := range habr.AllFeeds() {
+		if ctx.Err() != nil {
+			break // shutdown or the cycle's deadline: stop starting new feeds
+		}
+
+		if err := s.updateFeed(ctx, f); err != nil && !isCancellation(err) {
+			s.log.Error("updater: feed failed", "feed", f.Name(), "err", err)
+			errs = append(errs, fmt.Errorf("%s: %w", f.Name(), err))
+		}
+	}
+
+	return errors.Join(errs...)
+}
+
+// updateFeed runs the feed update, recovering a panic into a logged error so one
+// feed can never crash the worker.
+func (s *Service) updateFeed(ctx context.Context, f habr.RSSFeed) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			s.log.Error("updater: feed update panicked",
+				"feed", f.Name(), "panic", r, "stack", string(debug.Stack()))
+			err = fmt.Errorf("panic: %v", r)
+		}
+	}()
+
+	return s.updater.Execute(ctx, f)
+}
+
+// isCancellation reports whether err is context cancellation — shutdown or a
+// cycle's deadline — which is expected and so suppressed from the logs.
+func isCancellation(err error) bool {
+	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
+}
