@@ -1,4 +1,5 @@
-import { Divider, Flex, HelpMark, Link, Text } from "@gravity-ui/uikit";
+import { FaceRobotSmile, SquareArticle } from "@gravity-ui/icons";
+import { Divider, Flex, HelpMark, Icon, Link, Text } from "@gravity-ui/uikit";
 
 import type { Article } from "../types";
 import { SummaryTheses } from "./SummaryTheses";
@@ -50,7 +51,8 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            🤖 Ссылка на пересказ
+            <Icon data={FaceRobotSmile} size={16} />
+            Ссылка на пересказ
           </Link>
         )}
         <Link
@@ -59,7 +61,8 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          📃 Открыть оригинал
+          <Icon data={SquareArticle} size={16} />
+          Открыть оригинал
         </Link>
       </Text>
       <Divider className="article-divider" />

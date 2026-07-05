@@ -91,9 +91,13 @@ body {
   margin: 16px 0 0;
 }
 
-/* Comfortable touch padding for the caption-sized links. */
+/* Comfortable touch padding for the caption-sized links; every link in
+   these rows is an icon + label pair. */
 .links-row a {
   padding-block: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .article-divider {
@@ -116,13 +120,6 @@ body {
    attribution. */
 .footer .links-row {
   margin-top: 4px;
-}
-
-/* Icon + label pairs in the footer links. */
-.footer .links-row a {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
 }
 
 /* Fixed back-to-top icon, bottom-right — parity position, lifted above the
