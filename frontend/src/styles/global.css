@@ -128,6 +128,6 @@ body {
    rule can land after this one in the bundle. */
 button.back-to-top {
   position: fixed;
-  bottom: env(safe-area-inset-bottom, 0px);
+  bottom: calc(5px + env(safe-area-inset-bottom, 0px));
   right: calc(5px + env(safe-area-inset-right, 0px));
 }
