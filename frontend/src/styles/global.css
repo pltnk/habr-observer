@@ -118,6 +118,13 @@ body {
   margin-top: 4px;
 }
 
+/* Icon + label pairs in the footer links. */
+.footer .links-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 /* Fixed back-to-top icon, bottom-right — parity position, lifted above the
    mobile safe area. The padding grows the 32px icon to a ~44px touch target. */
 .back-to-top {

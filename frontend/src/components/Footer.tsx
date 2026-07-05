@@ -1,4 +1,5 @@
-import { Link, Text } from "@gravity-ui/uikit";
+import { FaceAlien, LogoGithub } from "@gravity-ui/icons";
+import { Icon, Link, Text } from "@gravity-ui/uikit";
 
 export function Footer() {
   return (
@@ -36,7 +37,8 @@ export function Footer() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          😎 Автор pltnk.dev
+          <Icon data={FaceAlien} size={16} />
+          Автор pltnk.dev
         </Link>
         <Link
           view="secondary"
@@ -44,7 +46,8 @@ export function Footer() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          🍝 Код на GitHub
+          <Icon data={LogoGithub} size={16} />
+          Код на GitHub
         </Link>
       </Text>
     </footer>
