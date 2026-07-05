@@ -122,13 +122,12 @@ body {
   margin-top: 4px;
 }
 
-/* Fixed back-to-top icon, bottom-right — parity position, lifted above the
-   mobile safe area. The padding grows the 32px icon to a ~44px touch target. */
-.back-to-top {
+/* Fixed back-to-top button, bottom-right — parity position, lifted above
+   the mobile safe area. The Button supplies its own box and hover styling.
+   The element selector outweighs .g-button's own position: relative, whose
+   rule can land after this one in the bundle. */
+button.back-to-top {
   position: fixed;
   bottom: env(safe-area-inset-bottom, 0px);
   right: calc(5px + env(safe-area-inset-right, 0px));
-  display: inline-flex;
-  padding: 6px;
-  text-decoration: none;
 }

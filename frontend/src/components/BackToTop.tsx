@@ -1,19 +1,21 @@
 import { CircleArrowUp } from "@gravity-ui/icons";
-import { Icon, Link, Tooltip } from "@gravity-ui/uikit";
+import { Button, Icon, Tooltip } from "@gravity-ui/uikit";
 
-// The original's instant in-page anchor jump, with the parity-era ⬆️ emoji
-// modernized to a Gravity icon post-parity.
+// A plain in-page scroll action: no URL hash (it polluted Metrika's URL
+// stats) and an absolute top, unlike the old #top anchor jump.
 export function BackToTop() {
   return (
     <Tooltip content="Вернуться в начало">
-      <Link
-        view="secondary"
-        href="#top"
+      <Button
+        view="flat-secondary"
+        size="xl"
+        pin="circle-circle"
         aria-label="Вернуться в начало"
         className="back-to-top"
+        onClick={() => window.scrollTo(0, 0)}
       >
         <Icon data={CircleArrowUp} size={32} />
-      </Link>
+      </Button>
     </Tooltip>
   );
 }
