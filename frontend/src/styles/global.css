@@ -1,0 +1,125 @@
+/* Layout and spacing only — colors and typography come from Gravity tokens. */
+
+body {
+  margin: 0;
+}
+
+/* One centered, fluid content column — the original's geometry: 736 px max
+   width and 16 px side padding at every viewport width. */
+.page {
+  max-width: 736px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  /* The breathing room the original padded under Streamlit's chrome bar. */
+  padding-top: 56px;
+  /* Titles and theses are uncontrolled content: break an unbroken token
+     rather than ever scroll the page horizontally. */
+  overflow-wrap: break-word;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1,
+.header h2 {
+  margin: 0;
+}
+
+.header h2 {
+  margin-top: 16px;
+}
+
+.loading-row {
+  margin-top: 48px;
+}
+
+.empty-banner {
+  margin-top: 32px;
+}
+
+/* The original centered the toggle row with a Streamlit CSS hack; here it is
+   plain layout. The min-height keeps the row a comfortable touch target. */
+.summary-toggle {
+  margin-top: 32px;
+  min-height: 44px;
+}
+
+/* Centered while the tab labels fit, internally scrollable when they don't. */
+.tab-bar {
+  width: fit-content;
+  max-width: 100%;
+  margin: 24px auto 0;
+}
+
+.article-title {
+  margin-top: 28px;
+}
+
+.article-title h3 {
+  margin: 0;
+  /* Let the flex item shrink below an unbroken token so overflow-wrap can act. */
+  min-width: 0;
+}
+
+.theses {
+  margin-block: 12px;
+  padding-inline-start: 24px;
+  font-size: var(--g-text-body-2-font-size);
+  line-height: var(--g-text-body-2-line-height);
+}
+
+.theses li {
+  margin-block: 6px;
+}
+
+.theses-disclosure {
+  margin-block: 12px;
+}
+
+/* Comfortable touch target for the disclosure trigger. */
+.theses-disclosure .g-disclosure__trigger {
+  min-height: 44px;
+}
+
+/* Paired links: the ~2em gap matches the original's &emsp;&emsp;, and
+   flex-wrap lets narrow screens wrap cleanly instead of overflowing. */
+.links-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 2em;
+  margin: 16px 0 0;
+}
+
+/* Comfortable touch padding for the caption-sized links. */
+.links-row a {
+  padding-block: 8px;
+}
+
+.article-divider {
+  margin-top: 16px;
+}
+
+.footer {
+  margin-top: 8px;
+  text-align: center;
+  /* Enough bottom room that the fixed ⬆️ never overlaps the footer text —
+     the original overlapped at bottom: 0. */
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+.attribution {
+  margin: 4px 0 0;
+}
+
+/* Fixed ⬆️ back-to-top, bottom-right — parity with the original, lifted
+   above the mobile safe area. */
+.back-to-top {
+  position: fixed;
+  bottom: env(safe-area-inset-bottom, 0px);
+  right: calc(5px + env(safe-area-inset-right, 0px));
+  font-size: xx-large;
+  text-decoration: none;
+}

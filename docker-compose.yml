@@ -82,14 +82,17 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        SL_PORT: ${OBSERVER_SL_PORT:-8501}
+        # Bakes the Yandex.Metrika counter into the page when set; leave
+        # empty for an analytics-free build.
+        OBSERVER_METRIKA_ID: ${OBSERVER_METRIKA_ID:-}
     container_name: observer-frontend
     environment:
+      # Consumed by nginx's startup envsubst as the /feeds proxy target.
       OBSERVER_BACKEND_URL: ${OBSERVER_BACKEND_URL:-http://server:8080}
-      OBSERVER_FEED_CACHE_TTL: ${OBSERVER_FEED_CACHE_TTL:-60}
-      OBSERVER_SL_PORT: ${OBSERVER_SL_PORT:-8501}
     ports:
-      - "${OBSERVER_SL_PORT:-8501}:${OBSERVER_SL_PORT:-8501}"
+      # The host port defaults to 8501 on purpose so the external TLS reverse
+      # proxy keeps working untouched.
+      - "${OBSERVER_WEB_PORT:-8501}:8080"
     # The server image has no shell for a health probe, so this waits only for
     # its start; the frontend tolerates an unready backend by design.
     depends_on:
