@@ -9,7 +9,7 @@ export function Header() {
         Обозреватель Хабра
       </Text>
       <Text as="h2" variant="subheader-2">
-        Краткий пересказ лучших статей с Хабра от нейросети YandexGPT
+        Краткий пересказ лучших статей от нейросети YandexGPT
       </Text>
     </Box>
   );
