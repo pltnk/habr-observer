@@ -11,7 +11,7 @@ export interface Article {
   title: string;
   // RFC 3339 UTC timestamp; parsed only at render time.
   pub_date: string;
-  // Present in the payload but never displayed.
+  // Habr username; linked in the title help popover when non-empty.
   author: string;
   summary: Summary | null;
 }

@@ -27,9 +27,25 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
         <Text as="h3" variant="subheader-3">
           {article.title}
         </Text>
-        <HelpMark>
-          Дата публикации: {pubDateFormat.format(new Date(article.pub_date))}{" "}
-          (UTC)
+        {/* safePolygon keeps the popover open while the pointer travels to
+            the author link inside it. */}
+        <HelpMark popoverProps={{ enableSafePolygon: true }}>
+          {article.author !== "" && (
+            <div>
+              Автор:{" "}
+              <Link
+                href={`https://habr.com/ru/users/${encodeURIComponent(article.author)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {article.author}
+              </Link>
+            </div>
+          )}
+          <div>
+            Дата публикации: {pubDateFormat.format(new Date(article.pub_date))}{" "}
+            (UTC)
+          </div>
         </HelpMark>
       </Flex>
       {article.summary !== null && (
