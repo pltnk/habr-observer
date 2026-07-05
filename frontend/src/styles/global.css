@@ -112,12 +112,13 @@ body {
   margin: 4px 0 0;
 }
 
-/* Fixed ⬆️ back-to-top, bottom-right — parity with the original, lifted
-   above the mobile safe area. */
+/* Fixed back-to-top icon, bottom-right — parity position, lifted above the
+   mobile safe area. The padding grows the 32px icon to a ~44px touch target. */
 .back-to-top {
   position: fixed;
   bottom: env(safe-area-inset-bottom, 0px);
   right: calc(5px + env(safe-area-inset-right, 0px));
-  font-size: xx-large;
+  display: inline-flex;
+  padding: 6px;
   text-decoration: none;
 }
