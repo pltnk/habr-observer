@@ -5,7 +5,8 @@ import { BackToTop } from "./components/BackToTop";
 import { FeedTabs } from "./components/FeedTabs";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
-import { SummaryToggle } from "./components/SummaryToggle";
+import { SummaryViewSelector } from "./components/SummaryViewSelector";
+import { useCollapsePreference } from "./hooks/useCollapsePreference";
 import { useFeeds } from "./hooks/useFeeds";
 
 // Streamlit showed its spinner only after 0.1 s in flight; the same
@@ -38,7 +39,7 @@ function LoadingIndicator() {
 
 export default function App() {
   const feedsState = useFeeds();
-  const [collapseSummaries, setCollapseSummaries] = useState(true);
+  const [collapseSummaries, setCollapseSummaries] = useCollapsePreference();
 
   return (
     <div className="page">
@@ -54,8 +55,8 @@ export default function App() {
         )}
         {feedsState.status === "ready" && (
           <>
-            <SummaryToggle
-              checked={collapseSummaries}
+            <SummaryViewSelector
+              collapsed={collapseSummaries}
               onUpdate={setCollapseSummaries}
             />
             <FeedTabs

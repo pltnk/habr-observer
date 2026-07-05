@@ -38,11 +38,9 @@ body {
   margin-top: 32px;
 }
 
-/* The original centered the toggle row with a Streamlit CSS hack; here it is
-   plain layout. The min-height keeps the row a comfortable touch target. */
-.summary-toggle {
+/* The view-selector row; size-xl segments are intrinsically 44px. */
+.summary-view-selector {
   margin-top: 32px;
-  min-height: 44px;
 }
 
 /* Centered while the tab labels fit, internally scrollable when they don't. */
