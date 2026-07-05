@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
-import { Alert, Flex, Spin, Text } from "@gravity-ui/uikit";
+import { Alert, Flex, Spin, Text, ThemeProvider } from "@gravity-ui/uikit";
 
 import { BackToTop } from "./components/BackToTop";
 import { FeedTabs } from "./components/FeedTabs";
 import { Footer } from "./components/Footer";
 import { Header } from "./components/Header";
 import { SummaryViewSelector } from "./components/SummaryViewSelector";
+import { ThemeSelector } from "./components/ThemeSelector";
 import { useCollapsePreference } from "./hooks/useCollapsePreference";
 import { useFeeds } from "./hooks/useFeeds";
+import { useThemePreference } from "./hooks/useThemePreference";
 
 // Streamlit showed its spinner only after 0.1 s in flight; the same
 // anti-flicker delay keeps a fast response from flashing a spinner.
@@ -40,38 +42,54 @@ function LoadingIndicator() {
 export default function App() {
   const feedsState = useFeeds();
   const [collapseSummaries, setCollapseSummaries] = useCollapsePreference();
+  const [themePreference, setThemePreference] = useThemePreference();
 
   return (
-    <div className="page">
-      <Header />
-      <main>
-        {feedsState.status === "loading" && <LoadingIndicator />}
-        {feedsState.status === "empty" && (
-          <Alert
-            theme="info"
-            message="Лента пересобирается, загляните позже 😉"
-            className="empty-banner"
-          />
-        )}
-        {feedsState.status === "ready" && (
+    // The provider lives here, not in main.tsx, because the pinned theme is
+    // app state; "system" keeps live-tracking the OS until the user picks.
+    <ThemeProvider theme={themePreference ?? "system"}>
+      <div className="page">
+        <Header />
+        <main>
+          {feedsState.status === "loading" && <LoadingIndicator />}
+          {feedsState.status === "empty" && (
+            <Alert
+              theme="info"
+              message="Лента пересобирается, загляните позже 😉"
+              className="empty-banner"
+            />
+          )}
+          {feedsState.status === "ready" && (
+            <>
+              <Flex
+                justifyContent="center"
+                alignItems="center"
+                gap={3}
+                className="controls-row"
+              >
+                <SummaryViewSelector
+                  collapsed={collapseSummaries}
+                  onUpdate={setCollapseSummaries}
+                />
+                <ThemeSelector
+                  preference={themePreference}
+                  onUpdate={setThemePreference}
+                />
+              </Flex>
+              <FeedTabs
+                feeds={feedsState.feeds}
+                collapseSummaries={collapseSummaries}
+              />
+            </>
+          )}
+        </main>
+        {feedsState.status !== "loading" && (
           <>
-            <SummaryViewSelector
-              collapsed={collapseSummaries}
-              onUpdate={setCollapseSummaries}
-            />
-            <FeedTabs
-              feeds={feedsState.feeds}
-              collapseSummaries={collapseSummaries}
-            />
+            <Footer />
+            <BackToTop />
           </>
         )}
-      </main>
-      {feedsState.status !== "loading" && (
-        <>
-          <Footer />
-          <BackToTop />
-        </>
-      )}
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }

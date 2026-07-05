@@ -2,7 +2,7 @@ import {
   ChevronsCollapseVertical,
   ChevronsExpandVertical,
 } from "@gravity-ui/icons";
-import { Flex, Icon, SegmentedRadioGroup, Tooltip } from "@gravity-ui/uikit";
+import { Icon, SegmentedRadioGroup, Tooltip } from "@gravity-ui/uikit";
 
 type SummaryView = "collapsed" | "expanded";
 
@@ -19,29 +19,27 @@ export function SummaryViewSelector({
   onUpdate,
 }: SummaryViewSelectorProps) {
   return (
-    <Flex justifyContent="center" className="summary-view-selector">
-      <Tooltip content="Показывать пересказы кратко или целиком">
-        <SegmentedRadioGroup<SummaryView>
-          size="m"
-          aria-label="Вид пересказов"
-          value={collapsed ? "collapsed" : "expanded"}
-          onUpdate={(value) => onUpdate(value === "collapsed")}
+    <Tooltip content="Показывать пересказы кратко или целиком">
+      <SegmentedRadioGroup<SummaryView>
+        size="m"
+        aria-label="Вид пересказов"
+        value={collapsed ? "collapsed" : "expanded"}
+        onUpdate={(value) => onUpdate(value === "collapsed")}
+      >
+        {/* Icon-only options: the aria-labels carry the names. */}
+        <SegmentedRadioGroup.Option
+          value="collapsed"
+          controlProps={{ "aria-label": "Кратко" }}
         >
-          {/* Icon-only options: the aria-labels carry the names. */}
-          <SegmentedRadioGroup.Option
-            value="collapsed"
-            controlProps={{ "aria-label": "Кратко" }}
-          >
-            <Icon data={ChevronsCollapseVertical} size={16} />
-          </SegmentedRadioGroup.Option>
-          <SegmentedRadioGroup.Option
-            value="expanded"
-            controlProps={{ "aria-label": "Целиком" }}
-          >
-            <Icon data={ChevronsExpandVertical} size={16} />
-          </SegmentedRadioGroup.Option>
-        </SegmentedRadioGroup>
-      </Tooltip>
-    </Flex>
+          <Icon data={ChevronsCollapseVertical} size={16} />
+        </SegmentedRadioGroup.Option>
+        <SegmentedRadioGroup.Option
+          value="expanded"
+          controlProps={{ "aria-label": "Целиком" }}
+        >
+          <Icon data={ChevronsExpandVertical} size={16} />
+        </SegmentedRadioGroup.Option>
+      </SegmentedRadioGroup>
+    </Tooltip>
   );
 }

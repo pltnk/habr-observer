@@ -8,7 +8,7 @@ import "./styles/global.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ThemeProvider, configure } from "@gravity-ui/uikit";
+import { configure } from "@gravity-ui/uikit";
 
 import App from "./App";
 
@@ -19,12 +19,8 @@ if (root === null) {
   throw new Error("missing #root element");
 }
 
-// ThemeProvider's default theme is "system": it live-tracks the OS
-// light/dark preference, matching the original's automatic theming.
 createRoot(root).render(
   <StrictMode>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <App />
   </StrictMode>,
 );

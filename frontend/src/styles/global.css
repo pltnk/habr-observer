@@ -38,8 +38,8 @@ body {
   margin-top: 32px;
 }
 
-/* The view-selector row; size-xl segments are intrinsically 44px. */
-.summary-view-selector {
+/* The centered row with the summary-view and theme selectors. */
+.controls-row {
   margin-top: 32px;
 }
 
