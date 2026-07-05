@@ -109,7 +109,13 @@ body {
 }
 
 .attribution {
-  margin: 4px 0 0;
+  margin: 16px 0 0;
+}
+
+/* Inside the footer the author links are the second row, tucked under the
+   attribution. */
+.footer .links-row {
+  margin-top: 4px;
 }
 
 /* Fixed back-to-top icon, bottom-right — parity position, lifted above the

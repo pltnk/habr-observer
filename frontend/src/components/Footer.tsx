@@ -3,24 +3,6 @@ import { Link, Text } from "@gravity-ui/uikit";
 export function Footer() {
   return (
     <footer className="footer">
-      <Text as="p" variant="caption-2" color="secondary" className="links-row">
-        <Link
-          view="secondary"
-          href="https://pltnk.dev"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          😎 Автор pltnk.dev
-        </Link>
-        <Link
-          view="secondary"
-          href="https://github.com/pltnk/habr-observer"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          🍝 Код на GitHub
-        </Link>
-      </Text>
       <Text
         as="p"
         variant="caption-2"
@@ -46,6 +28,24 @@ export function Footer() {
           300.ya.ru
         </Link>
         .
+      </Text>
+      <Text as="p" variant="caption-2" color="secondary" className="links-row">
+        <Link
+          view="secondary"
+          href="https://pltnk.dev"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          😎 Автор pltnk.dev
+        </Link>
+        <Link
+          view="secondary"
+          href="https://github.com/pltnk/habr-observer"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          🍝 Код на GitHub
+        </Link>
       </Text>
     </footer>
   );
