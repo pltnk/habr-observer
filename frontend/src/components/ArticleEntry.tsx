@@ -68,7 +68,6 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
         <Text as="h3" variant="subheader-3">
           <Link
             view="primary"
-            visitable
             href={article.id}
             target="_blank"
             rel="noopener noreferrer"
