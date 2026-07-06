@@ -118,11 +118,14 @@ body {
 
 /* Center the 24px info button on the title's first line (line-height 1.2)
    at every fluid heading size — the flex row is top-aligned so wrapped
-   titles don't drag the button between their lines. */
+   titles don't drag the button between their lines. The auto margin pins
+   it to the card's top-right corner for every title length, where wrapped
+   titles already put it. */
 .article-title .article-info {
   margin-block-start: calc(
     (1.2 * var(--g-text-subheader-3-font-size) - 24px) / 2
   );
+  margin-inline-start: auto;
 }
 
 /* Icon-labelled meta rows inside the title info popover. */

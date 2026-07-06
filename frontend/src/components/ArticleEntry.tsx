@@ -69,9 +69,9 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
 
   return (
     <article className="article">
-      {/* flex-start + the CSS offset on .article-info anchor the button to
-          the title's FIRST line; centering against the whole block leaves it
-          floating between the lines of wrapped titles on phones. */}
+      {/* flex-start + the CSS offsets on .article-info anchor the button to
+          the title's first line and pin it to the card's top-right corner —
+          one consistent home regardless of how the title wraps. */}
       <Flex alignItems="flex-start" gap={2} className="article-title">
         <Text as="h3" variant="subheader-3">
           <Link
