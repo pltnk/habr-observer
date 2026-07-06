@@ -230,6 +230,9 @@ body {
 
 .attribution {
   margin: 0;
+  /* At the full column width the sentence wraps into a long line plus a
+     lone «300.ya.ru.» orphan — balance splits the lines near-evenly. */
+  text-wrap: balance;
 }
 
 /* Inside the footer the author links are the second row, tucked under the
