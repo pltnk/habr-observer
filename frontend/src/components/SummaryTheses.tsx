@@ -1,4 +1,4 @@
-import { ChevronDownWide, ChevronUpWide } from "@gravity-ui/icons";
+import { ChevronDownWide } from "@gravity-ui/icons";
 import { Button, Disclosure, Icon, Tooltip } from "@gravity-ui/uikit";
 
 // Mirrors the original's visible_theses=3: with collapsing on, this many
@@ -48,10 +48,9 @@ export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
                   onClick={props.onClick}
                   className="theses-toggle"
                 >
-                  <Icon
-                    data={props.expanded ? ChevronUpWide : ChevronDownWide}
-                    size={20}
-                  />
+                  {/* One chevron for both states — CSS turns it 180° on
+                      expand, like Gravity's own Disclosure arrow. */}
+                  <Icon data={ChevronDownWide} size={20} />
                 </Button>
               </Tooltip>
             );
