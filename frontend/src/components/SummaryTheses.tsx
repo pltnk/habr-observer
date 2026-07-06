@@ -1,8 +1,9 @@
+import { useId, useState } from "react";
 import { ChevronDownWide } from "@gravity-ui/icons";
-import { Button, Disclosure, Icon, Tooltip } from "@gravity-ui/uikit";
+import { Button, Icon, Tooltip } from "@gravity-ui/uikit";
 
 // Mirrors the original's visible_theses=3: with collapsing on, this many
-// theses stay visible and the rest hide behind the disclosure.
+// theses stay visible and the rest hide behind the curtain.
 const VISIBLE_THESES = 3;
 
 interface SummaryThesesProps {
@@ -28,44 +29,54 @@ function ThesesList({
   );
 }
 
+// Hand-rolled curtain disclosure: Gravity has no height-animating collapse
+// (Disclosure fades opacity, Accordion disables even that), and neither can
+// place the trigger below the content. Here the toggle strip follows the
+// curtain region, so expanding slides it down past the revealed theses and
+// it always closes the card instead of splitting the list.
 export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
+  const curtainId = useId();
+  const toggleId = useId();
+  const [expanded, setExpanded] = useState(false);
+
   if (!collapsed || content.length <= VISIBLE_THESES) {
     return <ThesesList theses={content} last />;
   }
+  const label = expanded
+    ? "Свернуть продолжение пересказа"
+    : "Развернуть продолжение пересказа";
   return (
     <>
       <ThesesList theses={content.slice(0, VISIBLE_THESES)} />
-      <Disclosure className="theses-disclosure" defaultExpanded={false}>
-        <Disclosure.Summary>
-          {(props) => {
-            const label = props.expanded
-              ? "Свернуть продолжение пересказа"
-              : "Развернуть продолжение пересказа";
-            // The whole column-wide strip is clickable, like the original
-            // Streamlit expander header.
-            return (
-              <Tooltip content={label}>
-                <Button
-                  view="flat-secondary"
-                  size="l"
-                  width="max"
-                  id={props.id}
-                  aria-controls={props.ariaControls}
-                  aria-expanded={props.expanded}
-                  aria-label={label}
-                  onClick={props.onClick}
-                  className="theses-toggle"
-                >
-                  {/* One chevron for both states — CSS turns it 180° on
-                      expand, like Gravity's own Disclosure arrow. */}
-                  <Icon data={ChevronDownWide} size={20} />
-                </Button>
-              </Tooltip>
-            );
-          }}
-        </Disclosure.Summary>
-        <ThesesList theses={content.slice(VISIBLE_THESES)} last />
-      </Disclosure>
+      <div
+        id={curtainId}
+        role="region"
+        aria-labelledby={toggleId}
+        className={
+          expanded ? "theses-curtain theses-curtain-open" : "theses-curtain"
+        }
+      >
+        <div>
+          <ThesesList theses={content.slice(VISIBLE_THESES)} />
+        </div>
+      </div>
+      <Tooltip content={label}>
+        <Button
+          view="flat-secondary"
+          size="l"
+          width="max"
+          id={toggleId}
+          aria-controls={curtainId}
+          aria-expanded={expanded}
+          aria-label={label}
+          onClick={() => setExpanded((value) => !value)}
+          className="theses-toggle"
+        >
+          {/* One chevron for both states — CSS turns it 180° on expand,
+              like Gravity's own Disclosure arrow. */}
+          <Icon data={ChevronDownWide} size={20} />
+        </Button>
+      </Tooltip>
     </>
   );
 }

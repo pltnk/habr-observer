@@ -99,7 +99,10 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
         </Popover>
       </Flex>
       {article.summary !== null && (
+        /* Keyed by view mode: switching «Кратко»/«Целиком» remounts and
+           resets the per-article expansion, as the original layout did. */
         <SummaryTheses
+          key={collapsed ? "collapsed" : "flat"}
           content={article.summary.content}
           collapsed={collapsed}
         />
