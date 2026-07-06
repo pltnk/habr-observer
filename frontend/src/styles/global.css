@@ -200,6 +200,13 @@ body {
   margin-top: 16px;
 }
 
+/* In a summary-less card the divider follows the bare title directly and
+   gets the full card-closing gap — the 16px above is sized for the expander
+   strip, whose chevron is already inset in its 36px button. */
+.article-title + .article-divider {
+  margin-top: 24px;
+}
+
 .footer {
   /* The last divider gets the same gap before the footer as every divider
      gets before the next article's title. */
