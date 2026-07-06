@@ -134,7 +134,10 @@ body {
 }
 
 .theses {
-  margin-block: 12px;
+  /* No bottom margin of its own: the last item's 6px remains, so the
+     expander strip below hugs the list it continues instead of floating
+     12px away — less of the screen spent on chrome. */
+  margin-block: 12px 0;
   padding-inline-start: 24px;
   font-size: var(--g-text-body-2-font-size);
   line-height: var(--g-text-body-2-line-height);
@@ -145,7 +148,12 @@ body {
 }
 
 .theses-disclosure {
-  margin-block: 12px;
+  margin-block: 0 12px;
+}
+
+/* The continuation list hugs the strip from below the same way. */
+.theses-disclosure .theses {
+  margin-block-start: 0;
 }
 
 /* The expander chevron turns the way Gravity's own Disclosure arrow does:
