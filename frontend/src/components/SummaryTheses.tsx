@@ -10,9 +10,17 @@ interface SummaryThesesProps {
   collapsed: boolean;
 }
 
-function ThesesList({ theses }: { theses: string[] }) {
+// `last` marks the list that ends the card, giving it the extra bottom
+// margin that evens out the whitespace before the divider.
+function ThesesList({
+  theses,
+  last = false,
+}: {
+  theses: string[];
+  last?: boolean;
+}) {
   return (
-    <ul className="theses">
+    <ul className={last ? "theses theses-last" : "theses"}>
       {theses.map((thesis, index) => (
         <li key={index}>{thesis}</li>
       ))}
@@ -22,7 +30,7 @@ function ThesesList({ theses }: { theses: string[] }) {
 
 export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
   if (!collapsed || content.length <= VISIBLE_THESES) {
-    return <ThesesList theses={content} />;
+    return <ThesesList theses={content} last />;
   }
   return (
     <>
@@ -56,7 +64,7 @@ export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
             );
           }}
         </Disclosure.Summary>
-        <ThesesList theses={content.slice(VISIBLE_THESES)} />
+        <ThesesList theses={content.slice(VISIBLE_THESES)} last />
       </Disclosure>
     </>
   );

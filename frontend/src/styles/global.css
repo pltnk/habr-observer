@@ -156,6 +156,14 @@ body {
   margin-block-start: 0;
 }
 
+/* The list that ends the card leaves the divider as much visual whitespace
+   as the divider leaves the next title (28px + heading leading): 24px plus
+   the text's own leading. The collapsed strip doesn't need it — the chevron
+   is already inset in its 36px button. */
+.theses-last {
+  margin-block-end: 24px;
+}
+
 /* The expander chevron turns the way Gravity's own Disclosure arrow does:
    ArrowToggle transitions transform 0.1s ease-out between its bottom (0°)
    and top (180°) directions. The negative angle turns it through the right
