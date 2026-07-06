@@ -6,23 +6,34 @@ body {
 
 /* Typography restored to the original Streamlit app — values extracted from
    the live site's computed styles: Source Sans Pro, 16px body at 1.6,
-   44/36/28 heading scale (700/600/600), 14px captions. Token-level
-   overrides — the same mechanism Gravity's themer exports. */
+   14px captions, and the original's fluid (Bootstrap RFS) heading scale:
+   headings grow with the viewport below 1200px (~29/26/23px on a phone)
+   and cap at 44/36/28 (700/600/600) from 1200px up, line-height 1.2
+   throughout. Token-level overrides — the same mechanism Gravity's themer
+   exports. */
 .g-root {
   --g-font-family-sans: "Source Sans Pro", sans-serif;
   --g-text-display-font-weight: 700;
-  --g-text-display-3-font-size: 44px;
-  --g-text-display-3-line-height: 52.8px;
-  --g-text-subheader-2-font-size: 36px;
-  --g-text-subheader-2-line-height: 43.2px;
-  --g-text-subheader-3-font-size: 28px;
-  --g-text-subheader-3-line-height: 33.6px;
+  --g-text-display-3-font-size: calc(1.4rem + 1.8vw);
+  --g-text-display-3-line-height: 1.2;
+  --g-text-subheader-2-font-size: calc(1.35rem + 1.2vw);
+  --g-text-subheader-2-line-height: 1.2;
+  --g-text-subheader-3-font-size: calc(1.3rem + 0.6vw);
+  --g-text-subheader-3-line-height: 1.2;
   --g-text-body-1-font-size: 14px;
   --g-text-body-1-line-height: 22.4px;
   --g-text-body-2-font-size: 16px;
   --g-text-body-2-line-height: 25.6px;
   --g-text-caption-2-font-size: 14px;
   --g-text-caption-2-line-height: 22.4px;
+}
+
+@media (min-width: 1200px) {
+  .g-root {
+    --g-text-display-3-font-size: 44px;
+    --g-text-subheader-2-font-size: 36px;
+    --g-text-subheader-3-font-size: 28px;
+  }
 }
 
 /* One centered, fluid content column — the original's geometry: 736 px max
@@ -70,9 +81,9 @@ body {
   max-width: 100%;
   margin: 24px auto 0;
   /* Size-xl tabs render with the subheader-3 token, which the heading scale
-     above raises to 28px — scope it back to the original's 14px tab labels,
-     and tighten the item gap so all five feeds fit a phone screen without
-     horizontal scrolling. */
+     above raises to the fluid h3 size — scope it back to the original's 14px
+     tab labels, and tighten the item gap so all five feeds fit a phone screen
+     without horizontal scrolling. */
   --g-text-subheader-3-font-size: 14px;
   --g-text-subheader-3-line-height: 22.4px;
   --g-tabs-item-gap: 20px;
