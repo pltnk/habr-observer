@@ -289,15 +289,3 @@ button.back-to-top {
   bottom: calc(5px + env(safe-area-inset-bottom, 0px));
   right: calc(5px + env(safe-area-inset-right, 0px));
 }
-
-/* On phones the text column runs beneath the fixed button and the bare
-   glyph reads as inline text — give it Gravity's floating surface (the
-   Popup recipe). Desktop keeps the transparent look over empty margins. */
-@media (max-width: 768px) {
-  button.back-to-top {
-    background-color: var(--g-color-base-float);
-    box-shadow:
-      0 0 0 1px var(--g-color-line-generic-solid),
-      0 8px 20px 1px var(--g-color-sfx-shadow);
-  }
-}
