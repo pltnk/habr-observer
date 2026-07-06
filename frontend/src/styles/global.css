@@ -217,14 +217,13 @@ body {
 
 /* The expander chevron turns the way Gravity's own Disclosure arrow does:
    ArrowToggle transitions transform 0.1s ease-out between its bottom (0°)
-   and top (180°) directions. The negative angle turns it through the right
-   side — the opposite direction to the stock arrow. */
+   and top (180°) directions, sweeping clockwise through the left side. */
 .theses-toggle .g-icon {
   transition: transform 0.1s ease-out;
 }
 
 .theses-toggle[aria-expanded="true"] .g-icon {
-  transform: rotate(-180deg);
+  transform: rotate(180deg);
 }
 
 /* Paired links: the ~2em gap matches the original's &emsp;&emsp;, and
