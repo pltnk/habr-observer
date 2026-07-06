@@ -17,10 +17,11 @@ import {
 import type { Article } from "../types";
 import { SummaryTheses } from "./SummaryTheses";
 
-// UTC on purpose: the original displayed the raw UTC datetime; viewer-local
-// time would silently show different values to different users.
+// Viewer-local on purpose: habr itself localizes publication times into
+// the browser's timezone on hydration (its SSR emits UTC and client JS
+// rewrites it — verified against habr.com), so the same instant reads
+// identically here and there in one browser.
 const pubDateFormat = new Intl.DateTimeFormat("ru-RU", {
-  timeZone: "UTC",
   day: "2-digit",
   month: "2-digit",
   year: "numeric",
@@ -50,7 +51,7 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
       )}
       <div>
         <Icon data={Calendar} size={16} />
-        <span>{pubDateFormat.format(new Date(article.pub_date))} (UTC)</span>
+        <span>{pubDateFormat.format(new Date(article.pub_date))}</span>
       </div>
       {article.summary !== null && (
         <div>
