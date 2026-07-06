@@ -62,8 +62,10 @@ body {
   margin-top: 16px;
 }
 
+/* The spinner occupies the same 32px slot as the controls row / banner
+   that replaces it, so nothing jumps when loading resolves. */
 .loading-row {
-  margin-top: 48px;
+  margin-top: 32px;
 }
 
 .empty-banner {
