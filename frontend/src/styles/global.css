@@ -201,7 +201,9 @@ body {
 }
 
 .footer {
-  margin-top: 8px;
+  /* The last divider gets the same gap before the footer as every divider
+     gets before the next article's title. */
+  margin-top: 28px;
   text-align: center;
   /* Enough bottom room that the fixed ⬆️ never overlaps the footer text —
      the original overlapped at bottom: 0. */
@@ -209,7 +211,7 @@ body {
 }
 
 .attribution {
-  margin: 16px 0 0;
+  margin: 0;
 }
 
 /* Inside the footer the author links are the second row, tucked under the
