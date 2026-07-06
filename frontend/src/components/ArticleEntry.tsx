@@ -69,7 +69,10 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
 
   return (
     <article className="article">
-      <Flex alignItems="center" gap={2} className="article-title">
+      {/* flex-start + the CSS offset on .article-info anchor the button to
+          the title's FIRST line; centering against the whole block leaves it
+          floating between the lines of wrapped titles on phones. */}
+      <Flex alignItems="flex-start" gap={2} className="article-title">
         <Text as="h3" variant="subheader-3">
           <Link
             view="primary"
