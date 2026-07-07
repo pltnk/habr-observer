@@ -59,19 +59,18 @@ body {
   margin-top: 16px;
 }
 
-/* The spinner occupies the same 32px slot as the controls row / banner
-   that replaces it, so nothing jumps when loading resolves. */
-.loading-row {
-  margin-top: 32px;
-}
-
-.empty-banner {
-  margin-top: 32px;
-}
-
-/* The centered row with the summary-view and theme selectors. */
+/* The centered row with the summary-view and theme selectors — always
+   present (it needs no feed data), 32px below the tagline. */
 .controls-row {
   margin-top: 32px;
+}
+
+/* The loading spinner and empty banner fill the content slot below the
+   always-present controls, aligned with the tab bar that replaces them so the
+   content area doesn't jump when the feed resolves. */
+.loading-row,
+.empty-banner {
+  margin-top: 24px;
 }
 
 .tab-bar {

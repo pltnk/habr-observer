@@ -56,6 +56,24 @@ export default function App() {
       <div className="page">
         <Header />
         <main>
+          {/* The preference controls need no feed data, so they render right
+              away instead of waiting for the fetch — only the tabs and
+              articles below them depend on it. */}
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            gap={3}
+            className="controls-row"
+          >
+            <SummaryViewSelector
+              collapsed={collapseSummaries}
+              onUpdate={setCollapseSummaries}
+            />
+            <ThemeSelector
+              preference={themePreference}
+              onUpdate={setThemePreference}
+            />
+          </Flex>
           {feedsState.status === "loading" && <LoadingIndicator />}
           {feedsState.status === "empty" && (
             <Alert
@@ -65,27 +83,10 @@ export default function App() {
             />
           )}
           {feedsState.status === "ready" && (
-            <>
-              <Flex
-                justifyContent="center"
-                alignItems="center"
-                gap={3}
-                className="controls-row"
-              >
-                <SummaryViewSelector
-                  collapsed={collapseSummaries}
-                  onUpdate={setCollapseSummaries}
-                />
-                <ThemeSelector
-                  preference={themePreference}
-                  onUpdate={setThemePreference}
-                />
-              </Flex>
-              <FeedTabs
-                feeds={feedsState.feeds}
-                collapseSummaries={collapseSummaries}
-              />
-            </>
+            <FeedTabs
+              feeds={feedsState.feeds}
+              collapseSummaries={collapseSummaries}
+            />
           )}
         </main>
         {feedsState.status !== "loading" && (
