@@ -4,13 +4,10 @@ body {
   margin: 0;
 }
 
-/* Typography restored to the original Streamlit app — values extracted from
-   the live site's computed styles: Source Sans Pro, 16px body at 1.6,
-   14px captions, and the original's fluid (Bootstrap RFS) heading scale:
-   headings grow with the viewport below 1200px (~29/26/23px on a phone)
-   and cap at 44/36/28 (700/600/600) from 1200px up, line-height 1.2
-   throughout. Token-level overrides — the same mechanism Gravity's themer
-   exports. */
+/* Typography: Source Sans Pro, 16px body, 14px captions, and a fluid
+   (Bootstrap RFS) heading scale — headings grow with the viewport below
+   1200px (~29/26/23px on a phone) and cap at 44/36/28 (700/600/600) from
+   1200px up, line-height 1.2 throughout. Applied as Gravity token overrides. */
 .g-root {
   --g-font-family-sans: "Source Sans Pro", sans-serif;
   --g-text-display-font-weight: 700;
@@ -36,13 +33,13 @@ body {
   }
 }
 
-/* One centered, fluid content column — the original's geometry: 736 px max
-   width and 16 px side padding at every viewport width. */
+/* One centered, fluid content column: 736px max width and 16px side padding
+   at every viewport width. */
 .page {
   max-width: 736px;
   margin-inline: auto;
   padding-inline: 16px;
-  /* The breathing room the original padded under Streamlit's chrome bar. */
+  /* Top-of-page breathing room. */
   padding-top: 56px;
   /* Titles and theses are uncontrolled content: break an unbroken token
      rather than ever scroll the page horizontally. */
@@ -79,14 +76,15 @@ body {
 
 .tab-bar {
   margin-top: 24px;
-  /* The original's tab underline spans the whole content column, like the
-     article dividers — so the label-width line the TabList draws itself is
-     zeroed out below and redrawn here, same technique and color token. */
+  /* The tab underline spans the whole content column, like the article
+     dividers — so the label-width line the TabList draws itself is zeroed out
+     below (via --g-tabs-border-width) and redrawn here, same technique and
+     color token. */
   box-shadow: inset 0 -1px 0 0 var(--g-color-line-generic);
   /* Size-xl tabs render with the subheader-3 token, which the heading scale
-     above raises to the fluid h3 size — scope it back to the original's 14px
-     tab labels, and tighten the item gap so all five feeds fit a phone screen
-     without horizontal scrolling. */
+     above raises to the fluid h3 size — scope it back to 14px tab labels, and
+     tighten the item gap so all five feeds fit a phone screen without
+     horizontal scrolling. */
   --g-text-subheader-3-font-size: 14px;
   --g-text-subheader-3-line-height: 22.4px;
   --g-tabs-item-gap: 20px;
@@ -200,13 +198,6 @@ body {
   margin-block-start: 0;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .theses-curtain,
-  .theses-curtain-open {
-    transition: none;
-  }
-}
-
 /* A flat list («Целиком» or three-and-fewer theses) ends its card and
    leaves the divider as much visual whitespace as the divider leaves the
    next title (28px + heading leading): 24px plus the text's own leading.
@@ -226,8 +217,19 @@ body {
   transform: rotate(180deg);
 }
 
-/* Paired links: the ~2em gap matches the original's &emsp;&emsp;, and
-   flex-wrap lets narrow screens wrap cleanly instead of overflowing. */
+/* Under reduced motion the curtain slide and chevron rotation snap instantly;
+   the rotated end-state still conveys expanded vs collapsed. Placed after the
+   transitions it overrides so it wins the equal-specificity cascade. */
+@media (prefers-reduced-motion: reduce) {
+  .theses-curtain,
+  .theses-curtain-open,
+  .theses-toggle .g-icon {
+    transition: none;
+  }
+}
+
+/* Paired links: the ~2em gap separates them, and flex-wrap lets narrow
+   screens wrap cleanly instead of overflowing. */
 .links-row {
   display: flex;
   justify-content: center;
@@ -262,8 +264,8 @@ body {
      gets before the next article's title. */
   margin-top: 28px;
   text-align: center;
-  /* Enough bottom room that the fixed ⬆️ never overlaps the footer text —
-     the original overlapped at bottom: 0. */
+  /* Enough bottom room that the fixed back-to-top button never overlaps the
+     footer text. */
   padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
 }
 
@@ -280,10 +282,10 @@ body {
   margin-top: 4px;
 }
 
-/* Fixed back-to-top button, bottom-right — parity position, lifted above
-   the mobile safe area. The Button supplies its own box and hover styling.
-   The element selector outweighs .g-button's own position: relative, whose
-   rule can land after this one in the bundle. */
+/* Fixed back-to-top button, bottom-right, lifted above the mobile safe area.
+   The Button supplies its own box and hover styling. The element selector
+   outweighs .g-button's own position: relative, whose rule can land after
+   this one in the bundle. */
 button.back-to-top {
   position: fixed;
   bottom: calc(5px + env(safe-area-inset-bottom, 0px));

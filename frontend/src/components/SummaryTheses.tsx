@@ -42,7 +42,6 @@ function ThesesList({
  */
 export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
   const curtainId = useId();
-  const toggleId = useId();
   const [expanded, setExpanded] = useState(false);
 
   if (!collapsed || content.length <= VISIBLE_THESES) {
@@ -56,8 +55,6 @@ export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
       <ThesesList theses={content.slice(0, VISIBLE_THESES)} />
       <div
         id={curtainId}
-        role="region"
-        aria-labelledby={toggleId}
         className={
           expanded ? "theses-curtain theses-curtain-open" : "theses-curtain"
         }
@@ -71,7 +68,6 @@ export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
           view="flat-secondary"
           size="l"
           width="max"
-          id={toggleId}
           aria-controls={curtainId}
           aria-expanded={expanded}
           aria-label={label}

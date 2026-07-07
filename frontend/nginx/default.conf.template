@@ -20,6 +20,11 @@ server {
     # caches must key on the encoding.
     gzip_vary on;
 
+    # Don't let browsers MIME-sniff responses away from their declared type.
+    # nginx add_header does not merge across levels, so this must be repeated
+    # in each location that sets its own add_header (below).
+    add_header X-Content-Type-Options "nosniff" always;
+
     # SPA fallback.
     location / {
         try_files $uri /index.html;
@@ -28,11 +33,13 @@ server {
     # Deploys must propagate immediately.
     location = /index.html {
         add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options "nosniff" always;
     }
 
     # Hashed build assets are immutable by construction.
     location /assets/ {
         add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
     }
 
     location = /feeds {
