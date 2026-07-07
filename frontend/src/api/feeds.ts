@@ -1,7 +1,12 @@
 import type { Feed } from "../types";
 
-// The app's only backend call. /feeds is fetched same-origin — the Go server
-// sends no CORS headers, so nginx (or Vite's dev proxy) must front it.
+/**
+ * Fetches the feed list from the same-origin `/feeds` endpoint, aborting on
+ * `signal`. Throws on a non-2xx status or a non-array body.
+ *
+ * The Go backend sends no CORS headers, so a reverse proxy (nginx in
+ * production, Vite's dev proxy locally) must front `/feeds` same-origin.
+ */
 export async function fetchFeeds(signal: AbortSignal): Promise<Feed[]> {
   const response = await fetch("/feeds", { signal });
   if (!response.ok) {

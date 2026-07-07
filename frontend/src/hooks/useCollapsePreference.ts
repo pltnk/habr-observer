@@ -1,12 +1,12 @@
 import { useCallback, useState } from "react";
 
-// The one persisted user preference: collapse summaries to the first three
-// theses («Кратко») or show them in full («Целиком»).
+/** localStorage key for the summary-collapse preference. */
 const STORAGE_KEY = "habr-observer:collapse-theses";
 
-// Strict read: only an exact stored "false" turns collapsing off; anything
-// else — no value, garbage, or storage being unavailable — falls back to the
-// default (collapsed, matching the original app's on-by-default switch).
+/**
+ * Strict read: only an exact "false" turns collapsing off; any other value, a
+ * missing key, or unavailable storage falls back to the default (collapsed).
+ */
 function readStored(): boolean {
   try {
     return window.localStorage.getItem(STORAGE_KEY) !== "false";
@@ -15,9 +15,12 @@ function readStored(): boolean {
   }
 }
 
+/**
+ * Whether article summaries collapse to the first three theses, persisted to
+ * localStorage. Returns the current value and a setter; defaults to collapsed.
+ */
 export function useCollapsePreference(): [boolean, (value: boolean) => void] {
-  // Lazy initializer: a synchronous, pure read — no flash of the wrong view
-  // on load, and safe under StrictMode's double invocation.
+  // Lazy, synchronous read: no flash of the wrong view, safe under StrictMode.
   const [collapsed, setCollapsed] = useState(readStored);
 
   const update = useCallback((value: boolean) => {
@@ -25,7 +28,7 @@ export function useCollapsePreference(): [boolean, (value: boolean) => void] {
     try {
       window.localStorage.setItem(STORAGE_KEY, String(value));
     } catch {
-      // Private mode or quota: the preference lives for the session only.
+      // Private mode or quota: the preference lasts for the session only.
     }
   }, []);
 

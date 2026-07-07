@@ -11,9 +11,10 @@ interface SummaryViewSelectorProps {
   onUpdate: (collapsed: boolean) => void;
 }
 
-// Post-parity product change: the migration's import allowlist excluded
-// SegmentedRadioGroup/Icon/Tooltip/@gravity-ui/icons for Streamlit parity;
-// this deliberately replaces the parity-era Switch with a persisted view mode.
+/**
+ * Segmented control toggling article summaries between collapsed («Кратко»)
+ * and full («Целиком»).
+ */
 export function SummaryViewSelector({
   collapsed,
   onUpdate,

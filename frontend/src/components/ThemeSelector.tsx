@@ -13,9 +13,12 @@ interface ThemeSelectorProps {
   onUpdate: (value: ThemePreference) => void;
 }
 
+/**
+ * Segmented control pinning the theme to light or dark. Until pinned, the app
+ * follows the OS and the control shows the resolved theme.
+ */
 export function ThemeSelector({ preference, onUpdate }: ThemeSelectorProps) {
-  // Until a theme is pinned the app follows the OS, so the selector shows the
-  // resolved theme (the hook requires rendering inside ThemeProvider).
+  // Resolved active theme for the unpinned case; requires a ThemeProvider ancestor.
   const resolvedTheme = useThemeType();
   return (
     <Tooltip content="Светлая или тёмная тема">

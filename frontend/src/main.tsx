@@ -1,6 +1,6 @@
-// Source Sans Pro — the original Streamlit app's font — self-hosted with
-// cyrillic subsets, loaded before uikit's styles; uikit's own fonts.css is a
-// render-blocking Google Fonts @import and is deliberately not used.
+// Self-hosted Source Sans Pro (weights 400/600/700), imported before uikit's
+// styles. uikit's bundled fonts.css is a render-blocking Google Fonts import
+// and is intentionally not used.
 import "@fontsource/source-sans-pro/400.css";
 import "@fontsource/source-sans-pro/600.css";
 import "@fontsource/source-sans-pro/700.css";

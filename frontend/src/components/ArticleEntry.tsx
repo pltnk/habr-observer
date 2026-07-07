@@ -17,10 +17,7 @@ import {
 import type { Article } from "../types";
 import { SummaryTheses } from "./SummaryTheses";
 
-// Viewer-local on purpose: habr itself localizes publication times into
-// the browser's timezone on hydration (its SSR emits UTC and client JS
-// rewrites it — verified against habr.com), so the same instant reads
-// identically here and there in one browser.
+// Rendered in the viewer's timezone to match how habr shows publication times.
 const pubDateFormat = new Intl.DateTimeFormat("ru-RU", {
   day: "2-digit",
   month: "2-digit",
@@ -34,6 +31,11 @@ interface ArticleEntryProps {
   collapsed: boolean;
 }
 
+/**
+ * One article card: the title linking to the original habr article, an info
+ * popover (author, date, and summary link), the thesis summary, and a trailing
+ * divider.
+ */
 export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
   const info = (
     <div className="article-info-popover">
@@ -70,9 +72,9 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
 
   return (
     <article className="article">
-      {/* flex-start + the CSS offsets on .article-info anchor the button to
-          the title's first line and pin it to the card's top-right corner —
-          one consistent home regardless of how the title wraps. */}
+      {/* flex-start plus the CSS offset on .article-info pin the button to the
+          card's top-right corner, level with the title's first line whatever
+          way the title wraps. */}
       <Flex alignItems="flex-start" gap={2} className="article-title">
         <Text as="h3" variant="subheader-3">
           <Link
@@ -84,9 +86,8 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
             {article.title}
           </Link>
         </Text>
-        {/* HelpMark's icon is hardcoded, so this is its Popover-plus-button
-            shape with a CircleInfo glyph; safePolygon keeps the popover open
-            while the pointer travels to the links inside. */}
+        {/* Popover + icon button (HelpMark can't change its glyph); safePolygon
+            keeps it open while the pointer travels to the links inside. */}
         <Popover content={info} hasArrow enableSafePolygon>
           <Button
             view="flat-secondary"
@@ -100,8 +101,8 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
         </Popover>
       </Flex>
       {article.summary !== null && (
-        /* Keyed by view mode: switching «Кратко»/«Целиком» remounts and
-           resets the per-article expansion, as the original layout did. */
+        /* Keyed by view mode so switching «Кратко»/«Целиком» remounts and
+           resets the per-article expansion. */
         <SummaryTheses
           key={collapsed ? "collapsed" : "flat"}
           content={article.summary.content}

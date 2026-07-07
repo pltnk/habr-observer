@@ -1,12 +1,15 @@
 import { useCallback, useState } from "react";
 
-// The pinned theme choice; absence means "follow the OS theme".
+/** localStorage key for the pinned theme; absence means "follow the OS". */
 const STORAGE_KEY = "habr-observer:theme";
 
+/** A pinned theme choice. */
 export type ThemePreference = "light" | "dark";
 
-// Strict read: only the two exact stored values pin the theme; anything else —
-// no value, garbage, or storage being unavailable — keeps following the system.
+/**
+ * Strict read: only "light" or "dark" pin the theme; any other value, a missing
+ * key, or unavailable storage keeps following the system theme.
+ */
 function readStored(): ThemePreference | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
@@ -16,12 +19,15 @@ function readStored(): ThemePreference | null {
   }
 }
 
+/**
+ * The pinned theme, persisted to localStorage, or `null` to follow the OS.
+ * Returns the current value and a setter.
+ */
 export function useThemePreference(): [
   ThemePreference | null,
   (value: ThemePreference) => void,
 ] {
-  // Lazy initializer: a synchronous, pure read — no flash of the wrong theme
-  // on load, and safe under StrictMode's double invocation.
+  // Lazy, synchronous read: no flash of the wrong theme, safe under StrictMode.
   const [preference, setPreference] = useState(readStored);
 
   const update = useCallback((value: ThemePreference) => {
@@ -29,7 +35,7 @@ export function useThemePreference(): [
     try {
       window.localStorage.setItem(STORAGE_KEY, value);
     } catch {
-      // Private mode or quota: the choice lives for the session only.
+      // Private mode or quota: the choice lasts for the session only.
     }
   }, []);
 

@@ -11,10 +11,10 @@ import { useCollapsePreference } from "./hooks/useCollapsePreference";
 import { useFeeds } from "./hooks/useFeeds";
 import { useThemePreference } from "./hooks/useThemePreference";
 
-// Streamlit showed its spinner only after 0.1 s in flight; the same
-// anti-flicker delay keeps a fast response from flashing a spinner.
+// Delay before showing the spinner, so a fast response never flashes one.
 const SPINNER_DELAY_MS = 100;
 
+/** Spinner shown while feeds load, deferred by {@link SPINNER_DELAY_MS}. */
 function LoadingIndicator() {
   const [visible, setVisible] = useState(false);
 
@@ -39,14 +39,19 @@ function LoadingIndicator() {
   );
 }
 
+/**
+ * Root component: fetches feeds and renders the header, controls, feed tabs,
+ * footer, and back-to-top button, switching between the loading, empty, and
+ * ready states.
+ */
 export default function App() {
   const feedsState = useFeeds();
   const [collapseSummaries, setCollapseSummaries] = useCollapsePreference();
   const [themePreference, setThemePreference] = useThemePreference();
 
   return (
-    // The provider lives here, not in main.tsx, because the pinned theme is
-    // app state; "system" keeps live-tracking the OS until the user picks.
+    // ThemeProvider lives here, not in main.tsx, because the pinned theme is
+    // app state; "system" follows the OS until the user pins a choice.
     <ThemeProvider theme={themePreference ?? "system"}>
       <div className="page">
         <Header />

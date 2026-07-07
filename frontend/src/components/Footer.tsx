@@ -1,6 +1,7 @@
 import { FaceAlien, LogoGithub } from "@gravity-ui/icons";
 import { Icon, Link, Text } from "@gravity-ui/uikit";
 
+/** Page footer: source attribution and author/repository links. */
 export function Footer() {
   return (
     <footer className="footer">

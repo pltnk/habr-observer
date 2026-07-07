@@ -2,17 +2,20 @@ import { useId, useState } from "react";
 import { ChevronDownWide } from "@gravity-ui/icons";
 import { Button, Icon, Tooltip } from "@gravity-ui/uikit";
 
-// Mirrors the original's visible_theses=3: with collapsing on, this many
-// theses stay visible and the rest hide behind the curtain.
+// With collapsing on, this many theses stay visible; the rest hide behind
+// the curtain.
 const VISIBLE_THESES = 3;
 
 interface SummaryThesesProps {
   content: string[];
+  /** Whether a long summary collapses behind the curtain; false shows it in full. */
   collapsed: boolean;
 }
 
-// `last` marks the list that ends the card, giving it the extra bottom
-// margin that evens out the whitespace before the divider.
+/**
+ * A thesis list. `last` marks the list that ends the card, adding the bottom
+ * margin that evens the whitespace before the divider.
+ */
 function ThesesList({
   theses,
   last = false,
@@ -29,11 +32,14 @@ function ThesesList({
   );
 }
 
-// Hand-rolled curtain disclosure: Gravity has no height-animating collapse
-// (Disclosure fades opacity, Accordion disables even that), and neither can
-// place the trigger below the content. Here the toggle strip follows the
-// curtain region, so expanding slides it down past the revealed theses and
-// it always closes the card instead of splitting the list.
+/**
+ * The article summary as a thesis list. When collapsed and longer than
+ * {@link VISIBLE_THESES}, the extra theses hide behind a sliding "curtain"
+ * whose toggle strip sits below them and always closes the card.
+ *
+ * Hand-rolled rather than Gravity's Disclosure/Accordion: neither animates
+ * height, nor can place the toggle below the content.
+ */
 export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
   const curtainId = useId();
   const toggleId = useId();
@@ -72,8 +78,7 @@ export function SummaryTheses({ content, collapsed }: SummaryThesesProps) {
           onClick={() => setExpanded((value) => !value)}
           className="theses-toggle"
         >
-          {/* One chevron for both states — CSS turns it 180° on expand,
-              like Gravity's own Disclosure arrow. */}
+          {/* One chevron for both states; CSS rotates it 180° on expand. */}
           <Icon data={ChevronDownWide} size={20} />
         </Button>
       </Tooltip>

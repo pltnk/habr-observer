@@ -1,5 +1,6 @@
 import { Box, Text } from "@gravity-ui/uikit";
 
+/** Page header: emoji, title, and tagline. */
 export function Header() {
   return (
     <Box as="header" className="header">

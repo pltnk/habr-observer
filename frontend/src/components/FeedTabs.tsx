@@ -9,14 +9,15 @@ interface FeedTabsProps {
   collapseSummaries: boolean;
 }
 
+/**
+ * Feed tab bar with one panel per feed. All panels stay mounted (TabPanel
+ * hides the inactive ones), so each article's expansion state survives tab
+ * switches.
+ */
 export function FeedTabs({ feeds, collapseSummaries }: FeedTabsProps) {
-  // Tab state is deliberately not in the URL — the original kept it purely
-  // client-side and a reload reset it.
+  // Active tab is client-only state, not in the URL; a reload resets it.
   const [activeFeedId, setActiveFeedId] = useState(() => feeds[0]?.id ?? "");
 
-  // Every panel is rendered and stays mounted (TabPanel hides inactive ones),
-  // so per-article disclosure state survives tab switches — as the original's
-  // pre-rendered panels did.
   return (
     <TabProvider value={activeFeedId} onUpdate={setActiveFeedId}>
       <div className="tab-bar">

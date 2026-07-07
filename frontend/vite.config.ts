@@ -2,11 +2,9 @@ import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import type { Plugin } from "vite";
 
-// The Yandex.Metrika counter is production-only configuration: its id lives
-// in the deployment's .env, never in the repo. When OBSERVER_METRIKA_ID is
-// set at build time the placeholder comment in index.html is replaced with
-// the exact snippet the live site has always served; unset builds (dev, CI)
-// carry no analytics at all.
+// The Yandex.Metrika counter is production-only: its id lives in the
+// deployment's .env, never in the repo. This regex matches the placeholder
+// comment in index.html that injectMetrika replaces.
 const METRIKA_PLACEHOLDER =
   /[ \t]*<!-- yandex-metrika:[\s\S]*?removed otherwise -->\n?/;
 
@@ -31,6 +29,11 @@ ym(${id}, "init", {
 `;
 }
 
+/**
+ * Vite plugin that swaps the Metrika placeholder in index.html for the counter
+ * snippet when OBSERVER_METRIKA_ID is set at build time, or removes it
+ * otherwise (dev and CI builds ship no analytics).
+ */
 function injectMetrika(): Plugin {
   const id = process.env.OBSERVER_METRIKA_ID;
   return {
@@ -44,8 +47,8 @@ function injectMetrika(): Plugin {
 export default defineConfig({
   plugins: [react(), injectMetrika()],
   server: {
-    // The Go server sends no CORS headers, so /feeds must stay same-origin;
-    // nginx does this in production, this proxy does it in dev.
+    // /feeds must stay same-origin (the Go server sends no CORS headers);
+    // nginx fronts it in production, this proxy in dev.
     proxy: {
       "/feeds": "http://localhost:8080",
     },

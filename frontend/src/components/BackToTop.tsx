@@ -1,8 +1,10 @@
 import { CircleArrowUp } from "@gravity-ui/icons";
 import { Button, Icon, Tooltip } from "@gravity-ui/uikit";
 
-// A plain in-page scroll action: no URL hash (it polluted Metrika's URL
-// stats) and an absolute top, unlike the old #top anchor jump.
+/**
+ * Fixed button that scrolls the page to the top. Scrolls directly instead of
+ * navigating to a URL hash, which would pollute analytics URL stats.
+ */
 export function BackToTop() {
   return (
     <Tooltip content="Вернуться в начало">

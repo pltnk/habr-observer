@@ -3,14 +3,17 @@ import { useEffect, useState } from "react";
 import { fetchFeeds } from "../api/feeds";
 import type { Feed } from "../types";
 
+/** Loading, ready with feeds, or empty (no data or a fetch failure). */
 export type FeedsState =
   | { status: "loading" }
   | { status: "ready"; feeds: Feed[] }
   | { status: "empty" };
 
-// Fetches /feeds once on mount — no polling, no retries: the data changes
-// every ~10 minutes server-side. A network error, a non-2xx status, or a
-// malformed body all fold into "empty", the same state as an empty feed list.
+/**
+ * Fetches `/feeds` once on mount. No polling or retries — the data changes only
+ * every ~10 minutes server-side. Any failure (network, non-2xx, malformed body)
+ * folds into "empty", the same state as an empty feed list.
+ */
 export function useFeeds(): FeedsState {
   const [state, setState] = useState<FeedsState>({ status: "loading" });
 
