@@ -29,7 +29,7 @@ const pubDateFormat = new Intl.DateTimeFormat("ru-RU", {
 interface ArticleEntryProps {
   article: Article;
   collapsed: boolean;
-  /** Play the load fade-up (true only during the feed's initial entrance). */
+  /** Play the load fade-in (true only during the feed's initial entrance). */
   entering: boolean;
 }
 

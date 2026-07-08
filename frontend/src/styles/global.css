@@ -66,10 +66,8 @@ body {
 }
 
 /* 32px above the spinner/banner — the subheader-to-controls gap — so the
-   loading and empty states pick up the header rhythm. Below the empty banner
-   the footer's own 28px top margin sets the gap: 4px short of 32 on purpose,
-   because the footer text's line-height leading makes that space read as even
-   with the 32px above (a solid box edge above vs. text below). */
+   loading and empty states pick up the header rhythm. Both stand alone (the
+   footer shows only with content), so nothing follows them on screen. */
 .loading-row,
 .empty-banner {
   margin-top: 32px;
@@ -224,17 +222,6 @@ body {
   transform: rotate(180deg);
 }
 
-/* Under reduced motion the curtain slide and chevron rotation snap instantly;
-   the rotated end-state still conveys expanded vs collapsed. Placed after the
-   transitions it overrides so it wins the equal-specificity cascade. */
-@media (prefers-reduced-motion: reduce) {
-  .theses-curtain,
-  .theses-curtain-open,
-  .theses-toggle .g-icon {
-    transition: none;
-  }
-}
-
 /* Paired links: the ~2em gap separates them, and flex-wrap lets narrow
    screens wrap cleanly instead of overflowing. */
 .links-row {
@@ -319,13 +306,6 @@ body {
     visibility 0s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .back-to-top-wrap,
-  .back-to-top-wrap-visible {
-    transition: none;
-  }
-}
-
 /* Progressive entrance: each level fades in, staggered top to bottom. The
    header, tagline, and controls play on load; the tab bar and articles — and
    the loading spinner and empty banner in their place — play when the feed
@@ -373,7 +353,17 @@ body {
   animation-delay: 0.33s;
 }
 
+/* Reduced motion: snap every transition and entrance animation to its rest
+   state — the curtain, chevron, back-to-top, and the page fade-in. Placed last
+   so it wins the equal-specificity cascade over the rules it overrides. */
 @media (prefers-reduced-motion: reduce) {
+  .theses-curtain,
+  .theses-curtain-open,
+  .theses-toggle .g-icon,
+  .back-to-top-wrap,
+  .back-to-top-wrap-visible {
+    transition: none;
+  }
   .header h1,
   .header h2,
   .controls-row,
