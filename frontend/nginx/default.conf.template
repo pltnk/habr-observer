@@ -1,0 +1,54 @@
+# The startup envsubst fills in ${OBSERVER_BACKEND_URL}; every other dollar
+# variable here is nginx's own and survives untouched.
+
+# Micro-cache for /feeds so bursts and scrapers hit nginx, not the Go server.
+# /tmp is the writable path in the unprivileged image.
+proxy_cache_path /tmp/feeds_cache keys_zone=feeds:1m max_size=10m;
+
+server {
+    listen 8080;
+    listen [::]:8080;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # The Go server sends no compression; this covers the SPA and /feeds both.
+    gzip on;
+    gzip_types text/plain text/css application/javascript application/json image/svg+xml;
+    gzip_proxied any;
+    # Correctness companion for gzip + long-lived public caching: shared
+    # caches must key on the encoding.
+    gzip_vary on;
+
+    # Don't let browsers MIME-sniff responses away from their declared type.
+    # nginx add_header does not merge across levels, so this must be repeated
+    # in each location that sets its own add_header (below).
+    add_header X-Content-Type-Options "nosniff" always;
+
+    # SPA fallback.
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # Deploys must propagate immediately.
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    # Hashed build assets are immutable by construction.
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    location = /feeds {
+        # GET (and, implicitly, HEAD) only.
+        limit_except GET {
+            deny all;
+        }
+        proxy_pass ${OBSERVER_BACKEND_URL};
+        proxy_cache feeds;
+        proxy_cache_valid 200 10s;
+    }
+}

@@ -78,6 +78,62 @@ func TestParseDate(t *testing.T) {
 	}
 }
 
+func TestParseAuthor(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "bare_username",
+			in:   "some_user",
+			want: "some_user",
+		},
+		{
+			name: "company_blog",
+			in:   "some_user (SomeCompany.com)",
+			want: "some_user",
+		},
+		{
+			name: "company_name_with_spaces",
+			in:   "some_user (Рога и копыта)",
+			want: "some_user",
+		},
+		{
+			name: "no_space_before_bracket",
+			in:   "some_user(SomeCompany)",
+			want: "some_user",
+		},
+		{
+			name: "trimmed_whitespace",
+			in:   "  \tsome_user\n",
+			want: "some_user",
+		},
+		{
+			name: "company_only",
+			in:   "(SomeCompany.com)",
+			want: "",
+		},
+		{
+			name: "empty",
+			in:   "",
+			want: "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := parseAuthor(tc.in); got != tc.want {
+				t.Fatalf("parseAuthor(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestParseXML_ValidRSS(t *testing.T) {
 	t.Parallel()
 

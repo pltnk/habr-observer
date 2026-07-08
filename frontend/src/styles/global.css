@@ -1,0 +1,376 @@
+/* Layout and spacing only — colors and typography come from Gravity tokens. */
+
+body {
+  margin: 0;
+}
+
+/* Typography: Source Sans Pro, 16px body, 14px captions, and a fluid
+   (Bootstrap RFS) heading scale — headings grow with the viewport below
+   1200px (~29/26/23px on a phone) and cap at 44/36/28 (700/600/600) from
+   1200px up, line-height 1.2 throughout. Applied as Gravity token overrides. */
+.g-root {
+  --g-font-family-sans: "Source Sans Pro", sans-serif;
+  --g-text-display-font-weight: 700;
+  --g-text-display-3-font-size: calc(1.4rem + 1.8vw);
+  --g-text-display-3-line-height: 1.2;
+  --g-text-subheader-2-font-size: calc(1.35rem + 1.2vw);
+  --g-text-subheader-2-line-height: 1.2;
+  --g-text-subheader-3-font-size: calc(1.3rem + 0.6vw);
+  --g-text-subheader-3-line-height: 1.2;
+  --g-text-body-1-font-size: 14px;
+  --g-text-body-1-line-height: 22.4px;
+  --g-text-body-2-font-size: 16px;
+  --g-text-body-2-line-height: 25.6px;
+  --g-text-caption-2-font-size: 14px;
+  --g-text-caption-2-line-height: 22.4px;
+}
+
+@media (min-width: 1200px) {
+  .g-root {
+    --g-text-display-3-font-size: 44px;
+    --g-text-subheader-2-font-size: 36px;
+    --g-text-subheader-3-font-size: 28px;
+  }
+}
+
+/* One centered, fluid content column: 736px max width and 16px side padding
+   at every viewport width. */
+.page {
+  max-width: 736px;
+  margin-inline: auto;
+  padding-inline: 16px;
+  /* Top-of-page breathing room. */
+  padding-top: 56px;
+  /* Titles and theses are uncontrolled content: break an unbroken token
+     rather than ever scroll the page horizontally. */
+  overflow-wrap: break-word;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1,
+.header h2 {
+  margin: 0;
+}
+
+.header h2 {
+  margin-top: 16px;
+}
+
+/* The centered row with the summary-view and theme selectors — always
+   present (it needs no feed data), 32px below the tagline. */
+.controls-row {
+  margin-top: 32px;
+}
+
+/* 32px above the spinner/banner — the subheader-to-controls gap — so the
+   loading and empty states pick up the header rhythm. Both stand alone (the
+   footer shows only with content), so nothing follows them on screen. */
+.loading-row,
+.empty-banner {
+  margin-top: 32px;
+}
+
+/* Empty state: a centered robot glyph over a muted line, no box — a quiet
+   sibling of the loading row. The icon shares the text's secondary color. */
+.empty-banner .g-icon {
+  color: var(--g-color-text-secondary);
+}
+
+.tab-bar {
+  margin-top: 24px;
+  /* The tab underline spans the whole content column, like the article
+     dividers — so the label-width line the TabList draws itself is zeroed out
+     below (via --g-tabs-border-width) and redrawn here, same technique and
+     color token. */
+  box-shadow: inset 0 -1px 0 0 var(--g-color-line-generic);
+  /* Size-xl tabs render with the subheader-3 token, which the heading scale
+     above raises to the fluid h3 size — scope it back to 14px tab labels, and
+     tighten the item gap so all five feeds fit a phone screen without
+     horizontal scrolling. */
+  --g-text-subheader-3-font-size: 14px;
+  --g-text-subheader-3-line-height: 22.4px;
+  --g-tabs-item-gap: 20px;
+}
+
+/* Centered while the tab labels fit, internally scrollable when they don't. */
+.tab-bar .g-tab-list {
+  --g-tabs-border-width: 0px;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+@media (max-width: 359px) {
+  .tab-bar {
+    --g-tabs-item-gap: 12px;
+  }
+}
+
+.article-title {
+  margin-top: 28px;
+}
+
+.article-title h3 {
+  margin: 0;
+  /* Let the flex item shrink below an unbroken token so overflow-wrap can act. */
+  min-width: 0;
+}
+
+/* Center the 24px info button on the title's first line (line-height 1.2)
+   at every fluid heading size — the flex row is top-aligned so wrapped
+   titles don't drag the button between their lines. The auto margin pins
+   it to the card's top-right corner for every title length, where wrapped
+   titles already put it. */
+.article-title .article-info {
+  margin-block-start: calc(
+    (1.2 * var(--g-text-subheader-3-font-size) - 24px) / 2
+  );
+  margin-inline-start: auto;
+}
+
+/* Icon-labelled meta rows inside the title info popover. */
+.article-info-popover {
+  padding: var(--g-spacing-3);
+}
+
+.article-info-popover > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.article-info-popover > div + div {
+  margin-top: 4px;
+}
+
+.article-info-popover .g-icon {
+  color: var(--g-color-text-secondary);
+}
+
+.theses {
+  /* No bottom margin of its own: the last item's 6px remains, so the
+     expander strip below hugs the list it continues instead of floating
+     12px away — less of the screen spent on chrome. */
+  margin-block: 12px 0;
+  padding-inline-start: 24px;
+  font-size: var(--g-text-body-2-font-size);
+  line-height: var(--g-text-body-2-line-height);
+}
+
+.theses li {
+  margin-block: 6px;
+}
+
+/* The hidden continuation rides a grid row from 0fr to 1fr — the CSS way
+   to transition to height:auto — so the toggle strip below slides down with
+   the revealed theses and always closes the card. visibility flips after
+   the slide, keeping hidden theses out of the a11y tree and find-in-page
+   while the slide-up stays visible. */
+.theses-curtain {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows 0.2s ease-out,
+    visibility 0s 0.2s;
+}
+
+.theses-curtain-open {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition:
+    grid-template-rows 0.2s ease-out,
+    visibility 0s;
+}
+
+.theses-curtain > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Inside the curtain the list continues at the item rhythm. Margins can't
+   collapse across the curtain's overflow boundary the way sibling li
+   margins do, so the first item drops its own top margin and the visible
+   list's 6px carries the seam — item gaps read identical either side. */
+.theses-curtain .theses {
+  margin-block: 0;
+}
+
+.theses-curtain .theses li:first-child {
+  margin-block-start: 0;
+}
+
+/* A flat list («Целиком» or three-and-fewer theses) ends its card and
+   leaves the divider as much visual whitespace as the divider leaves the
+   next title (28px + heading leading): 24px plus the text's own leading.
+   Collapsed and expanded cards end with the strip instead. */
+.theses-last {
+  margin-block-end: 24px;
+}
+
+/* The expander chevron turns the way Gravity's own Disclosure arrow does:
+   ArrowToggle transitions transform 0.1s ease-out between its bottom (0°)
+   and top (180°) directions, sweeping clockwise through the left side. */
+.theses-toggle .g-icon {
+  transition: transform 0.1s ease-out;
+}
+
+.theses-toggle[aria-expanded="true"] .g-icon {
+  transform: rotate(180deg);
+}
+
+/* Paired links: the ~2em gap separates them, and flex-wrap lets narrow
+   screens wrap cleanly instead of overflowing. */
+.links-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 2em;
+  margin: 16px 0 0;
+}
+
+/* Comfortable touch padding for the caption-sized links; every link in
+   these rows is an icon + label pair. */
+.links-row a {
+  padding-block: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.article-divider {
+  margin-top: 16px;
+}
+
+/* In a summary-less card the divider follows the bare title directly and
+   gets the full card-closing gap — the 16px above is sized for the expander
+   strip, whose chevron is already inset in its 36px button. */
+.article-title + .article-divider {
+  margin-top: 24px;
+}
+
+.footer {
+  /* The last divider gets the same gap before the footer as every divider
+     gets before the next article's title. */
+  margin-top: 28px;
+  text-align: center;
+  /* Enough bottom room that the fixed back-to-top button never overlaps the
+     footer text. */
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+.attribution {
+  margin: 0;
+  /* At the full column width the sentence wraps into a long line plus a
+     lone «300.ya.ru.» orphan — balance splits the lines near-evenly. */
+  text-wrap: balance;
+}
+
+/* Inside the footer the author links are the second row, tucked under the
+   attribution. */
+.footer .links-row {
+  margin-top: 4px;
+}
+
+/* Back-to-top button, fixed bottom-right and lifted above the mobile safe
+   area. The fixed position and the slide live on this wrapper, not the button,
+   so they don't fight the Button's own hover/active scale transform.
+
+   Hidden below the fold until the page is scrolled: it slides up into view as
+   you scroll down (a small countermovement) and slides back down at the top.
+   visibility flips after the slide so it isn't focusable while off-screen. */
+.back-to-top-wrap {
+  position: fixed;
+  bottom: calc(5px + env(safe-area-inset-bottom, 0px));
+  right: calc(5px + env(safe-area-inset-right, 0px));
+  transform: translateY(calc(100% + 5px + env(safe-area-inset-bottom, 0px)));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease,
+    visibility 0s 0.25s;
+}
+
+.back-to-top-wrap-visible {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease,
+    visibility 0s;
+}
+
+/* Progressive entrance: each level fades in, staggered top to bottom. The
+   header, tagline, and controls play on load; the tab bar and articles — and
+   the loading spinner and empty banner in their place — play when the feed
+   resolves and they mount. `both` keeps each element hidden through its delay
+   (no pre-animation flash). The article stagger is gated to the initial load
+   (FeedTabs drops .article-enter afterwards) so switching tabs — which unhides
+   a display:none panel — doesn't replay it. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.header h1,
+.header h2,
+.controls-row,
+.tab-bar,
+.article-enter,
+.loading-row,
+.empty-banner {
+  animation: fade-in 0.6s ease both;
+}
+
+.header h1 {
+  animation-delay: 0.05s;
+}
+.header h2 {
+  animation-delay: 0.12s;
+}
+.controls-row {
+  animation-delay: 0.19s;
+}
+/* The spinner and banner stand in for the feed, so they enter on the tab bar's
+   beat — a step after the controls. (The spinner's own 300ms mount timer runs
+   before this delay even starts.) */
+.tab-bar,
+.empty-banner,
+.loading-row {
+  animation-delay: 0.26s;
+}
+.article-enter {
+  animation-delay: 0.33s;
+}
+
+/* Reduced motion: snap every transition and entrance animation to its rest
+   state — the curtain, chevron, back-to-top, and the page fade-in. Placed last
+   so it wins the equal-specificity cascade over the rules it overrides. */
+@media (prefers-reduced-motion: reduce) {
+  .theses-curtain,
+  .theses-curtain-open,
+  .theses-toggle .g-icon,
+  .back-to-top-wrap,
+  .back-to-top-wrap-visible {
+    transition: none;
+  }
+  .header h1,
+  .header h2,
+  .controls-row,
+  .tab-bar,
+  .article-enter,
+  .loading-row,
+  .empty-banner {
+    animation: none;
+  }
+}

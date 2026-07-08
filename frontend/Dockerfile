@@ -1,43 +1,37 @@
 # syntax=docker/dockerfile:1
-# check=skip=JSONArgsRecommended : the CMD needs shell form to expand the port.
 
-FROM python:3.9-slim
-WORKDIR /opt/frontend
+# ---- build ----
+FROM node:24.18.0-alpine AS build
+WORKDIR /src
 
-# Resolve `from app import ...` from any working directory; flush logs straight
-# to docker.
-ENV PYTHONPATH=/opt/frontend
-ENV PYTHONUNBUFFERED=true
-
-# curl exists only for the HEALTHCHECK below. The non-root user mirrors the
-# backend images; --create-home gives Streamlit a writable HOME.
-RUN apt-get update && apt-get install -y --no-install-recommends curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && useradd --create-home nonroot
-
-# Separate dependency install so it is cached until requirements.txt changes.
-# The cache mount persists pip's download cache across builds.
-COPY requirements.txt ./
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt
-
-# Overwrite Streamlit's bundled static assets with the app's branding
-# (favicon, cover, localized index.html).
-COPY app/static/ /usr/local/lib/python3.9/site-packages/streamlit/static/
+# Separate dependency install so it is cached until the manifests change. The
+# cache mount persists npm's download cache across builds.
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
 
 COPY . .
 
-# Build-time port, persisted as env for the HEALTHCHECK and CMD; compose passes
-# OBSERVER_SL_PORT here and publishes the same value.
-ARG SL_PORT=8501
-EXPOSE ${SL_PORT}
-ENV OBSERVER_SL_PORT=${SL_PORT}
+# Production-only analytics: when set, the Yandex.Metrika snippet is baked
+# into index.html at build time (see vite.config.ts); unset builds carry none.
+ARG OBSERVER_METRIKA_ID
 
-USER nonroot
+# Type-checks and emits the static bundle into dist/.
+RUN npm run build
+
+# ---- runtime ----
+# Runs non-root and listens on 8080 out of the box, mirroring the backend
+# images' non-root convention.
+FROM nginxinc/nginx-unprivileged:1.30.3-alpine
+
+COPY --from=build /src/dist /usr/share/nginx/html
+
+# The official entrypoint envsubsts *.template files into /etc/nginx/conf.d at
+# startup — that is what resolves ${OBSERVER_BACKEND_URL} in the proxy config.
+COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
+
+EXPOSE 8080
 
 # Interval, timeout, and retries come from the compose healthcheck block; this
-# supplies only the test.
-HEALTHCHECK CMD curl --fail http://localhost:${OBSERVER_SL_PORT}/_stcore/health
-
-# Shell form so the port variable expands.
-CMD streamlit run run_app.py --server.address=0.0.0.0 --server.port=${OBSERVER_SL_PORT} --browser.gatherUsageStats=false
+# supplies only the test. Probing / also verifies the SPA files are served.
+HEALTHCHECK CMD wget -q --spider http://localhost:8080/ || exit 1

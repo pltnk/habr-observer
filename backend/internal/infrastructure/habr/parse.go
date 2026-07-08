@@ -39,6 +39,11 @@ func parseDate(date string) (time.Time, error) {
 	return t, nil
 }
 
+func parseAuthor(creator string) string {
+	username, _, _ := strings.Cut(creator, "(")
+	return strings.TrimSpace(username)
+}
+
 func parseXML(data []byte) ([]*domain.Article, error) {
 	data = bytes.TrimSpace(data)
 
@@ -64,7 +69,7 @@ func parseXML(data []byte) ([]*domain.Article, error) {
 			ID:      strings.TrimSpace(it.GUID),
 			Title:   strings.TrimSpace(it.Title),
 			PubDate: pd,
-			Author:  strings.TrimSpace(it.Creator),
+			Author:  parseAuthor(it.Creator),
 		})
 	}
 

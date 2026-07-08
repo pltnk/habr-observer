@@ -35,6 +35,12 @@ const (
 	// sharingURLFile is a successful /api/sharing-url response,
 	// served by the sharing-URL integration test.
 	sharingURLFile = "sharing_url.json"
+
+	// summaryContentPartialFile and summaryPagePartialFile are the API and HTML
+	// responses for a long article whose summary ends with the continuation
+	// notice (continuationThesis), used to verify GetSummaryContent strips it.
+	summaryContentPartialFile = "summary_content_partial.json"
+	summaryPagePartialFile    = "summary_page_partial.html"
 )
 
 // readTestData returns the contents of testdata/filename or fails the test.
@@ -49,7 +55,7 @@ func readTestData(t *testing.T, filename string) []byte {
 	return b
 }
 
-// expectedSummaryLines returns the thesis contents from summaryFixtureFile.
+// expectedSummaryLines returns the thesis contents from summaryContentFile.
 // Both the API and HTML integration tests assert against these, since both the
 // JSON sharing response and the page's og:description describe the same article.
 func expectedSummaryLines(t *testing.T) []string {

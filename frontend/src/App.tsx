@@ -1,0 +1,112 @@
+import { useEffect, useState } from "react";
+import { FaceRobotSmile } from "@gravity-ui/icons";
+import { Flex, Icon, Spin, Text, ThemeProvider } from "@gravity-ui/uikit";
+
+import { BackToTop } from "./components/BackToTop";
+import { FeedTabs } from "./components/FeedTabs";
+import { Footer } from "./components/Footer";
+import { Header } from "./components/Header";
+import { SummaryViewSelector } from "./components/SummaryViewSelector";
+import { ThemeSelector } from "./components/ThemeSelector";
+import { useCollapsePreference } from "./hooks/useCollapsePreference";
+import { useFeeds } from "./hooks/useFeeds";
+import { useThemePreference } from "./hooks/useThemePreference";
+
+// Delay before showing the spinner: cache-warm loads resolve well under this,
+// so the spinner appears only on genuinely slow fetches instead of flashing.
+const SPINNER_DELAY_MS = 300;
+
+/** Spinner shown while feeds load, deferred by {@link SPINNER_DELAY_MS}. */
+function LoadingIndicator() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setVisible(true), SPINNER_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!visible) {
+    return null;
+  }
+  return (
+    <Flex
+      justifyContent="center"
+      alignItems="center"
+      gap={3}
+      className="loading-row"
+    >
+      <Spin size="l" />
+      <Text variant="body-2">Читаю статьи...</Text>
+    </Flex>
+  );
+}
+
+/**
+ * Root component: fetches feeds and renders the header, controls, feed tabs,
+ * footer, and back-to-top button, switching between the loading, empty, and
+ * ready states.
+ */
+export default function App() {
+  const feedsState = useFeeds();
+  const [collapseSummaries, setCollapseSummaries] = useCollapsePreference();
+  const [themePreference, setThemePreference] = useThemePreference();
+
+  return (
+    // ThemeProvider lives here, not in main.tsx, because the pinned theme is
+    // app state; "system" follows the OS until the user pins a choice.
+    <ThemeProvider theme={themePreference ?? "system"}>
+      <div className="page">
+        <Header />
+        <main>
+          {/* The preference controls need no feed data, so they render right
+              away instead of waiting for the fetch — only the tabs and
+              articles below them depend on it. */}
+          <Flex
+            justifyContent="center"
+            alignItems="center"
+            gap={3}
+            className="controls-row"
+          >
+            <SummaryViewSelector
+              collapsed={collapseSummaries}
+              onUpdate={setCollapseSummaries}
+            />
+            <ThemeSelector
+              preference={themePreference}
+              onUpdate={setThemePreference}
+            />
+          </Flex>
+          {feedsState.status === "loading" && <LoadingIndicator />}
+          {feedsState.status === "empty" && (
+            <Flex
+              direction="column"
+              alignItems="center"
+              gap={2}
+              className="empty-banner"
+            >
+              <Icon data={FaceRobotSmile} size={40} />
+              <Text variant="body-2" color="secondary">
+                Лента пересобирается, загляните позже
+              </Text>
+            </Flex>
+          )}
+          {feedsState.status === "ready" && (
+            <FeedTabs
+              feeds={feedsState.feeds}
+              collapseSummaries={collapseSummaries}
+            />
+          )}
+        </main>
+        {/* The footer credits the articles, and back-to-top only helps once
+            there's a feed to scroll — so both appear with content, not during
+            loading or the empty state. */}
+        {feedsState.status === "ready" && (
+          <>
+            <Footer />
+            <BackToTop />
+          </>
+        )}
+      </div>
+    </ThemeProvider>
+  );
+}
