@@ -11,7 +11,8 @@ import (
 )
 
 const defaultTimeout = 10 * time.Second
-const maxErrSnippet = 2048 // 2KiB
+const maxErrSnippet = 2048      // 2KiB
+const maxBodySize = 1024 * 1024 // 1 MiB — top feeds run ~110 KiB (40 items); ~10x headroom
 
 // Client fetches and parses Habr "top articles" RSS feeds into domain articles.
 // It is safe for concurrent use as long as its underlying [http.Client] is.
@@ -48,7 +49,7 @@ func (c *Client) getXML(ctx context.Context, f RSSFeed) ([]byte, error) {
 		return nil, fmt.Errorf("getting XML from %q: HTTP %s: %q", url, resp.Status, string(bytes.TrimSpace(body)))
 	}
 
-	data, err := io.ReadAll(resp.Body)
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxBodySize))
 	if err != nil {
 		return nil, fmt.Errorf("getting XML from %q: %w", url, err)
 	}
