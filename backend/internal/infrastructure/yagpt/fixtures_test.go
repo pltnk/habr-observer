@@ -55,7 +55,7 @@ func readTestData(t *testing.T, filename string) []byte {
 	return b
 }
 
-// expectedSummaryLines returns the thesis contents from summaryFixtureFile.
+// expectedSummaryLines returns the thesis contents from summaryContentFile.
 // Both the API and HTML integration tests assert against these, since both the
 // JSON sharing response and the page's og:description describe the same article.
 func expectedSummaryLines(t *testing.T) []string {
