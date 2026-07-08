@@ -69,8 +69,8 @@ services:
       OBSERVER_MONGO_ARTICLES: ${OBSERVER_MONGO_ARTICLES:-articles}
       OBSERVER_MONGO_FEEDS: ${OBSERVER_MONGO_FEEDS:-feeds}
       OBSERVER_FEED_CACHE_TTL: ${OBSERVER_FEED_CACHE_TTL:-60}
-    ports:
-      - "${OBSERVER_SERVER_PORT:-8080}:8080"
+    # No host port: the frontend reaches the server over the compose network
+    # (OBSERVER_BACKEND_URL). Add a ports mapping here for direct backend access.
     depends_on:
       db:
         condition: service_healthy
