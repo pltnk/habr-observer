@@ -80,7 +80,9 @@ func (c *Client) GetSummaryURL(ctx context.Context, articleURL string) (SummaryU
 }
 
 // GetSummaryContent fetches the summary content for the given
-// [SummaryURL] as a slice of thesis lines, one bullet per element.
+// [SummaryURL] as a slice of thesis lines, one bullet per element. The trailing
+// [continuationThesis] notice that 300.ya.ru appends to long articles'
+// summaries is dropped (see [stripContinuationThesis]).
 //
 // It first attempts the JSON API, which is the preferred path since
 // it returns structured data. If the API call fails for any reason
@@ -98,7 +100,7 @@ func (c *Client) GetSummaryURL(ctx context.Context, articleURL string) (SummaryU
 func (c *Client) GetSummaryContent(ctx context.Context, su SummaryURL) ([]string, error) {
 	content, apiErr := getSummaryContentAPI(ctx, c.client, su.Token())
 	if apiErr == nil {
-		return content, nil
+		return stripContinuationThesis(content), nil
 	}
 
 	if ctx.Err() != nil {
@@ -107,10 +109,22 @@ func (c *Client) GetSummaryContent(ctx context.Context, su SummaryURL) ([]string
 
 	content, htmlErr := getSummaryContentHTML(ctx, c.client, su.URL())
 	if htmlErr == nil {
-		return content, nil
+		return stripContinuationThesis(content), nil
 	}
 
 	return nil, fmt.Errorf("yagpt: getting summary content from %q: %w", su.String(), errors.Join(apiErr, htmlErr))
+}
+
+// stripContinuationThesis drops the trailing [continuationThesis] notice that
+// 300.ya.ru appends as the last thesis of a long article's summary. Content
+// that does not end with the notice is returned unchanged. Both the API and
+// HTML paths flow through here, so the notice is stripped regardless of source.
+func stripContinuationThesis(content []string) []string {
+	n := len(content)
+	if n > 0 && strings.TrimSpace(content[n-1]) == continuationThesis {
+		return content[:n-1]
+	}
+	return content
 }
 
 // GetSummary resolves and fetches the summary for the given article in one call,

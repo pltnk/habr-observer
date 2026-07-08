@@ -16,4 +16,9 @@ const (
 	sharingURLRateLimit       = 18 // requests per time window (20 with safety margin)
 	sharingURLRateLimitWindow = 60 * time.Second
 	sharingURLRateLimitBurst  = 6
+
+	// continuationThesis is the notice 300.ya.ru appends as the last thesis of a
+	// long article's summary, telling the reader to switch to the full detailed
+	// summary. The app strips it (see stripContinuationThesis).
+	continuationThesis = "Пересказана только часть. Для продолжения перейдите в режим подробного пересказа."
 )

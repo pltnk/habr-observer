@@ -379,6 +379,123 @@ func TestClient_GetSummaryContent_BothFail(t *testing.T) {
 	}
 }
 
+func TestClient_GetSummaryContent_StripsContinuationThesis(t *testing.T) {
+	t.Parallel()
+
+	// Both fixtures end with the continuation notice (300.ya.ru appends it as
+	// the last thesis of a long article's summary); GetSummaryContent drops it
+	// on both content paths, leaving the real theses.
+	apiBody := readTestData(t, summaryContentPartialFile)
+	htmlBody := readTestData(t, summaryPagePartialFile)
+	want := []string{"Первый тезис пересказа.", "Второй тезис пересказа."}
+
+	cases := []struct {
+		name string
+		rt   http.RoundTripper
+	}{
+		{
+			name: "api_path",
+			rt: RT(func(r *http.Request) (*http.Response, error) {
+				if r.Method != http.MethodPost {
+					t.Errorf("unexpected %s to %q: the API path should serve the content", r.Method, r.URL)
+				}
+				return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader(apiBody)), Request: r}, nil
+			}),
+		},
+		{
+			name: "html_fallback",
+			rt: RT(func(r *http.Request) (*http.Response, error) {
+				switch r.Method {
+				case http.MethodPost:
+					return nil, errors.New("api unavailable") // force the HTML fallback
+				case http.MethodGet:
+					return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader(htmlBody)), Request: r}, nil
+				default:
+					t.Errorf("unexpected %s to %q", r.Method, r.URL)
+					return nil, errors.New("unexpected method")
+				}
+			}),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			c, err := NewClient(testAuthToken, newHTTPClientWithRT(t, tc.rt))
+			if err != nil {
+				t.Fatalf("NewClient: %v", err)
+			}
+
+			su := mustSummaryURL(t, testSummaryRawURL)
+			got, err := c.GetSummaryContent(context.Background(), su)
+			if err != nil {
+				t.Fatalf("GetSummaryContent: %v", err)
+			}
+			if !reflect.DeepEqual(got, want) {
+				t.Fatalf("GetSummaryContent: got %v, want %v (continuation notice not stripped)", got, want)
+			}
+		})
+	}
+}
+
+func TestStripContinuationThesis(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		in   []string
+		want []string
+	}{
+		{
+			name: "strips_trailing_notice",
+			in:   []string{"First thesis.", "Second thesis.", continuationThesis},
+			want: []string{"First thesis.", "Second thesis."},
+		},
+		{
+			name: "strips_notice_with_surrounding_whitespace",
+			in:   []string{"First thesis.", "  " + continuationThesis + "\n"},
+			want: []string{"First thesis."},
+		},
+		{
+			name: "keeps_content_without_notice",
+			in:   []string{"First thesis.", "Second thesis."},
+			want: []string{"First thesis.", "Second thesis."},
+		},
+		{
+			name: "notice_not_last_is_kept",
+			in:   []string{continuationThesis, "Real thesis."},
+			want: []string{continuationThesis, "Real thesis."},
+		},
+		{
+			name: "only_notice_becomes_empty",
+			in:   []string{continuationThesis},
+			want: []string{},
+		},
+		{
+			name: "empty_input",
+			in:   []string{},
+			want: []string{},
+		},
+		{
+			name: "nil_input",
+			in:   nil,
+			want: nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			got := stripContinuationThesis(tc.in)
+			if !reflect.DeepEqual(got, tc.want) {
+				t.Fatalf("stripContinuationThesis(%q) = %q, want %q", tc.in, got, tc.want)
+			}
+		})
+	}
+}
+
 func TestClient_GetSummary_Success(t *testing.T) {
 	t.Parallel()
 
