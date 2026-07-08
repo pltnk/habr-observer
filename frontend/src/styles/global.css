@@ -65,12 +65,14 @@ body {
   margin-top: 32px;
 }
 
-/* The loading spinner and empty banner fill the content slot below the
-   always-present controls, aligned with the tab bar that replaces them so the
-   content area doesn't jump when the feed resolves. */
+/* 32px above the spinner/banner — the subheader-to-controls gap — so the
+   loading and empty states pick up the header rhythm. Below the empty banner
+   the footer's own 28px top margin sets the gap: 4px short of 32 on purpose,
+   because the footer text's line-height leading makes that space read as even
+   with the 32px above (a solid box edge above vs. text below). */
 .loading-row,
 .empty-banner {
-  margin-top: 24px;
+  margin-top: 32px;
 }
 
 .tab-bar {
