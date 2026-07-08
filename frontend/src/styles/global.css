@@ -319,3 +319,62 @@ body {
     transition: none;
   }
 }
+
+/* Progressive entrance: each level fades in, staggered top to bottom. The
+   header, tagline, and controls play on load; the tab bar and articles — and
+   the loading spinner and empty banner in their place — play when the feed
+   resolves and they mount. `both` keeps each element hidden through its delay
+   (no pre-animation flash). The article stagger is gated to the initial load
+   (FeedTabs drops .article-enter afterwards) so switching tabs — which unhides
+   a display:none panel — doesn't replay it. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.header h1,
+.header h2,
+.controls-row,
+.tab-bar,
+.article-enter,
+.loading-row,
+.empty-banner {
+  animation: fade-in 0.6s ease both;
+}
+
+.header h1 {
+  animation-delay: 0.05s;
+}
+.header h2 {
+  animation-delay: 0.12s;
+}
+.controls-row {
+  animation-delay: 0.19s;
+}
+/* The spinner and banner stand in for the feed, so they enter on the tab bar's
+   beat — a step after the controls. (The spinner's own 300ms mount timer runs
+   before this delay even starts.) */
+.tab-bar,
+.empty-banner,
+.loading-row {
+  animation-delay: 0.26s;
+}
+.article-enter {
+  animation-delay: 0.33s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header h1,
+  .header h2,
+  .controls-row,
+  .tab-bar,
+  .article-enter,
+  .loading-row,
+  .empty-banner {
+    animation: none;
+  }
+}

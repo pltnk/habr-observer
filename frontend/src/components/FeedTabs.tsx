@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tab, TabList, TabPanel, TabProvider } from "@gravity-ui/uikit";
 
 import type { Feed } from "../types";
@@ -18,6 +18,15 @@ export function FeedTabs({ feeds, collapseSummaries }: FeedTabsProps) {
   // Active tab is client-only state, not in the URL; a reload resets it.
   const [activeFeedId, setActiveFeedId] = useState(() => feeds[0]?.id ?? "");
 
+  // Play the article fade-up only on the initial feed load, then drop the class
+  // so switching tabs (which unhides a display:none panel) doesn't replay it.
+  // The delay outlasts the longest article stagger (0.33s) plus its 0.6s slide.
+  const [entering, setEntering] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setEntering(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <TabProvider value={activeFeedId} onUpdate={setActiveFeedId}>
       <div className="tab-bar">
@@ -36,6 +45,7 @@ export function FeedTabs({ feeds, collapseSummaries }: FeedTabsProps) {
               key={article.id}
               article={article}
               collapsed={collapseSummaries}
+              entering={entering}
             />
           ))}
         </TabPanel>

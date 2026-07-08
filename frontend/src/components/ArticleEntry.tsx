@@ -29,6 +29,8 @@ const pubDateFormat = new Intl.DateTimeFormat("ru-RU", {
 interface ArticleEntryProps {
   article: Article;
   collapsed: boolean;
+  /** Play the load fade-up (true only during the feed's initial entrance). */
+  entering: boolean;
 }
 
 /**
@@ -36,7 +38,11 @@ interface ArticleEntryProps {
  * popover (author, date, and summary link), the thesis summary, and a trailing
  * divider.
  */
-export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
+export function ArticleEntry({
+  article,
+  collapsed,
+  entering,
+}: ArticleEntryProps) {
   const info = (
     <div className="article-info-popover">
       {article.author !== "" && (
@@ -71,7 +77,7 @@ export function ArticleEntry({ article, collapsed }: ArticleEntryProps) {
   );
 
   return (
-    <article className="article">
+    <article className={entering ? "article article-enter" : "article"}>
       {/* flex-start plus the CSS offset on .article-info pin the button to the
           card's top-right corner, level with the title's first line whatever
           way the title wraps. */}
