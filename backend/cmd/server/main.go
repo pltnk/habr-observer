@@ -25,8 +25,7 @@ import (
 
 const (
 	// addr is the fixed container-internal listen address; the Dockerfile's
-	// EXPOSE, the compose port mapping, and the frontend's default backend URL
-	// all assume it.
+	// EXPOSE and the frontend's default backend URL both assume it.
 	addr = ":8080"
 
 	// closeTimeout bounds how long we wait to disconnect from MongoDB on shutdown.

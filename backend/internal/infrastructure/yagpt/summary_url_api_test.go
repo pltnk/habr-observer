@@ -29,8 +29,9 @@ const (
 	// present in your .env serves both the app and this test.
 	liveAuthTokenEnv = "OBSERVER_AUTH_TOKEN"
 
-	// liveAuthTokenPlaceholder is config's default when OBSERVER_AUTH_TOKEN is
-	// unset; treated as "no token" so the live test skips instead of failing.
+	// liveAuthTokenPlaceholder is the .env_example placeholder for
+	// OBSERVER_AUTH_TOKEN; a token still set to it isn't real, so treat it as
+	// "no token" and skip the live test instead of failing.
 	liveAuthTokenPlaceholder = "default"
 )
 
