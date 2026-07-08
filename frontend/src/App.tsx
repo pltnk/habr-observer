@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Flex, Spin, Text, ThemeProvider } from "@gravity-ui/uikit";
+import { FaceRobotSmile } from "@gravity-ui/icons";
+import { Flex, Icon, Spin, Text, ThemeProvider } from "@gravity-ui/uikit";
 
 import { BackToTop } from "./components/BackToTop";
 import { FeedTabs } from "./components/FeedTabs";
@@ -77,11 +78,17 @@ export default function App() {
           </Flex>
           {feedsState.status === "loading" && <LoadingIndicator />}
           {feedsState.status === "empty" && (
-            <Alert
-              theme="info"
-              message="Лента пересобирается, загляните позже 😉"
+            <Flex
+              direction="column"
+              alignItems="center"
+              gap={2}
               className="empty-banner"
-            />
+            >
+              <Icon data={FaceRobotSmile} size={40} />
+              <Text variant="body-2" color="secondary">
+                Лента пересобирается, загляните позже
+              </Text>
+            </Flex>
           )}
           {feedsState.status === "ready" && (
             <FeedTabs

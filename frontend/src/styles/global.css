@@ -75,6 +75,12 @@ body {
   margin-top: 32px;
 }
 
+/* Empty state: a centered robot glyph over a muted line, no box — a quiet
+   sibling of the loading row. The icon shares the text's secondary color. */
+.empty-banner .g-icon {
+  color: var(--g-color-text-secondary);
+}
+
 .tab-bar {
   margin-top: 24px;
   /* The tab underline spans the whole content column, like the article
