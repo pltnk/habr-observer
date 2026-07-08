@@ -283,12 +283,39 @@ body {
   margin-top: 4px;
 }
 
-/* Fixed back-to-top button, bottom-right, lifted above the mobile safe area.
-   The Button supplies its own box and hover styling. The element selector
-   outweighs .g-button's own position: relative, whose rule can land after
-   this one in the bundle. */
-button.back-to-top {
+/* Back-to-top button, fixed bottom-right and lifted above the mobile safe
+   area. The fixed position and the slide live on this wrapper, not the button,
+   so they don't fight the Button's own hover/active scale transform.
+
+   Hidden below the fold until the page is scrolled: it slides up into view as
+   you scroll down (a small countermovement) and slides back down at the top.
+   visibility flips after the slide so it isn't focusable while off-screen. */
+.back-to-top-wrap {
   position: fixed;
   bottom: calc(5px + env(safe-area-inset-bottom, 0px));
   right: calc(5px + env(safe-area-inset-right, 0px));
+  transform: translateY(calc(100% + 5px + env(safe-area-inset-bottom, 0px)));
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease,
+    visibility 0s 0.25s;
+}
+
+.back-to-top-wrap-visible {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+  transition:
+    transform 0.25s ease,
+    opacity 0.25s ease,
+    visibility 0s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top-wrap,
+  .back-to-top-wrap-visible {
+    transition: none;
+  }
 }
