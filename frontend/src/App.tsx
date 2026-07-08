@@ -97,7 +97,10 @@ export default function App() {
             />
           )}
         </main>
-        {feedsState.status !== "loading" && (
+        {/* The footer credits the articles, and back-to-top only helps once
+            there's a feed to scroll — so both appear with content, not during
+            loading or the empty state. */}
+        {feedsState.status === "ready" && (
           <>
             <Footer />
             <BackToTop />
