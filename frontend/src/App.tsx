@@ -14,7 +14,7 @@ import { useThemePreference } from "./hooks/useThemePreference";
 
 // Delay before showing the spinner: cache-warm loads resolve well under this,
 // so the spinner appears only on genuinely slow fetches instead of flashing.
-const SPINNER_DELAY_MS = 300;
+const SPINNER_DELAY_MS = 400;
 
 /** Spinner shown while feeds load, deferred by {@link SPINNER_DELAY_MS}. */
 function LoadingIndicator() {
