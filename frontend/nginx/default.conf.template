@@ -50,5 +50,10 @@ server {
         proxy_pass ${OBSERVER_BACKEND_URL};
         proxy_cache feeds;
         proxy_cache_valid 200 10s;
+        # Let the browser reuse a recent feed on quick refreshes; the feed only
+        # changes on the updater's ~10-min cadence, so a minute is safe.
+        add_header Cache-Control "public, max-age=60";
+        # add_header stops inheriting once a location sets its own, so re-assert.
+        add_header X-Content-Type-Options "nosniff" always;
     }
 }
