@@ -4,9 +4,10 @@ import type { Plugin } from "vite";
 
 // The Yandex.Metrika counter is production-only: its id lives in the
 // deployment's .env, never in the repo. This regex matches the placeholder
-// comment in index.html that injectMetrika replaces.
+// comment in index.html; group 1 captures its indentation so the injected
+// snippet lines up inside <head>.
 const METRIKA_PLACEHOLDER =
-  /[ \t]*<!-- yandex-metrika:[\s\S]*?removed otherwise -->\n?/;
+  /([ \t]*)<!-- yandex-metrika:[\s\S]*?removed otherwise -->\n?/;
 
 function metrikaSnippet(id: string): string {
   return `<!-- Yandex.Metrika counter -->
@@ -29,17 +30,25 @@ ym(${id}, "init", {
 `;
 }
 
+// indentLines prepends indent to every non-empty line, leaving blank lines bare.
+function indentLines(text: string, indent: string): string {
+  return text.replace(/^(?=.)/gm, indent);
+}
+
 /**
  * Vite plugin that swaps the Metrika placeholder in index.html for the counter
- * snippet when OBSERVER_METRIKA_ID is set at build time, or removes it
- * otherwise (dev and CI builds ship no analytics).
+ * snippet when OBSERVER_METRIKA_ID is set at build time, or removes it otherwise
+ * (dev and CI builds ship no analytics). The snippet keeps the placeholder's
+ * indentation and gains a trailing blank line so it sits cleanly inside <head>.
  */
 function injectMetrika(): Plugin {
   const id = process.env.OBSERVER_METRIKA_ID;
   return {
     name: "inject-metrika",
     transformIndexHtml(html) {
-      return html.replace(METRIKA_PLACEHOLDER, id ? metrikaSnippet(id) : "");
+      return html.replace(METRIKA_PLACEHOLDER, (_match, indent) =>
+        id ? indentLines(metrikaSnippet(id), indent) + "\n" : "",
+      );
     },
   };
 }
