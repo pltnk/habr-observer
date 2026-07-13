@@ -116,9 +116,8 @@ func articleIDs(arts []*domain.Article) []string {
 // summarizeArticles summarizes the given articles concurrently (one goroutine
 // per article) and returns the ones to persist — those that got a real
 // summary or the placeholder, each with its Summary set. An article whose
-// summary fails for a real reason is logged (with its URL) and dropped;
-// cancellation is suppressed. A panic skips only that article. Every spawned
-// goroutine is joined before returning, so none leaks.
+// summary fails is logged (with its URL) and dropped. A panic skips only that
+// article. Every spawned goroutine is joined before returning, so none leaks.
 func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*domain.Article) []*domain.Article {
 	if len(articles) == 0 {
 		return nil
@@ -141,9 +140,7 @@ func (u *UpdateFeedUsecase) summarizeArticles(ctx context.Context, articles []*d
 
 			summary, err := u.summarize(ctx, a)
 			if err != nil {
-				if !isCancellation(err) {
-					u.log.Error("updating feed: summary failed; skipping article", "url", a.ID, "err", err)
-				}
+				u.log.Error("updating feed: summary failed; skipping article", "url", a.ID, "err", err)
 				return // skip this article; never abort the batch
 			}
 
@@ -182,11 +179,4 @@ func (u *UpdateFeedUsecase) summarize(ctx context.Context, a *domain.Article) (*
 	}
 
 	return summary, nil
-}
-
-// isCancellation reports whether err is context cancellation — the run's
-// deadline or a shutdown. Such errors are expected, not failures, so a canceled
-// per-article summary is suppressed from the logs.
-func isCancellation(err error) bool {
-	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }

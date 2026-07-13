@@ -74,9 +74,7 @@ func (u *GetFeedsUsecase) Execute(ctx context.Context) ([]*domain.Feed, error) {
 			return nil, fmt.Errorf("getting feeds: %w", err)
 		}
 		// Freshness is not extended, so the next call retries the reload.
-		if !isCancellation(err) {
-			u.log.Error("getting feeds failed; serving stale cache", "err", err)
-		}
+		u.log.Error("getting feeds failed; serving stale cache", "err", err)
 		return u.cache, nil
 	}
 
