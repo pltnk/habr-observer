@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-const defaultTimeout = 10 * time.Second
+const defaultTimeout = 60 * time.Second
 const maxErrSnippet = 2048      // 2KiB
 const maxBodySize = 1024 * 1024 // 1 MiB — top feeds run ~110 KiB (40 items); ~10x headroom
 
@@ -22,7 +22,7 @@ type Client struct {
 }
 
 // NewClient returns a Client backed by hc. If hc is nil, a default
-// [http.Client] with a 10-second timeout is used. A Client must be created
+// [http.Client] with a 60-second timeout is used. A Client must be created
 // with NewClient; the zero value is not usable.
 func NewClient(hc *http.Client) *Client {
 	if hc == nil {
