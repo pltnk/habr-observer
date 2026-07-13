@@ -36,10 +36,10 @@ func NewService(updater feedUpdater, log *slog.Logger) *Service {
 	return &Service{updater: updater, log: log}
 }
 
-// UpdateAllFeeds refreshes every Habr feed sequentially, isolating each: a real
-// failure or panic is logged and collected but never aborts the rest, and
-// cancellation is suppressed. It returns the joined per-feed failures, or nil if
-// none occurred.
+// UpdateAllFeeds refreshes every Habr feed sequentially, isolating each: a
+// failure or panic — including a cut-short update on shutdown or the cycle's
+// deadline — is logged and collected but never aborts the rest. It returns the
+// joined per-feed failures, or nil if none occurred.
 func (s *Service) UpdateAllFeeds(ctx context.Context) error {
 	var errs []error
 
@@ -48,7 +48,7 @@ func (s *Service) UpdateAllFeeds(ctx context.Context) error {
 			break // shutdown or the cycle's deadline: stop starting new feeds
 		}
 
-		if err := s.updateFeed(ctx, f); err != nil && !isCancellation(err) {
+		if err := s.updateFeed(ctx, f); err != nil {
 			s.log.Error("updater: feed failed", "feed", f.Name(), "err", err)
 			errs = append(errs, fmt.Errorf("%s: %w", f.Name(), err))
 		}
@@ -69,10 +69,4 @@ func (s *Service) updateFeed(ctx context.Context, f habr.RSSFeed) (err error) {
 	}()
 
 	return s.updater.Execute(ctx, f)
-}
-
-// isCancellation reports whether err is context cancellation — shutdown or a
-// cycle's deadline — which is expected and so suppressed from the logs.
-func isCancellation(err error) bool {
-	return errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 }

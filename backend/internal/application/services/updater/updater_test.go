@@ -57,31 +57,26 @@ func TestUpdateAllFeeds_RunsEveryFeed(t *testing.T) {
 }
 
 // TestUpdateAllFeeds_HandlesEachFeedIndependently pins how one feed's outcome is
-// handled: a real failure or panic is reported in the joined error, a context
-// cancellation is suppressed as expected teardown, and in every case the remaining
-// feeds are still attempted.
+// handled: any failure or panic — a context cancellation included — is reported
+// in the joined error, and in every case the remaining feeds are still attempted.
 func TestUpdateAllFeeds_HandlesEachFeedIndependently(t *testing.T) {
 	t.Parallel()
 
 	cases := []struct {
-		name         string
-		upd          *fakeFeedUpdater
-		wantReported bool // the offending feed appears in the returned error
+		name string
+		upd  *fakeFeedUpdater
 	}{
 		{
-			name:         "error_is_reported",
-			upd:          &fakeFeedUpdater{errFeed: map[habr.RSSFeed]error{habr.FeedWeekly: errors.New("feed down")}},
-			wantReported: true,
+			name: "error_is_reported",
+			upd:  &fakeFeedUpdater{errFeed: map[habr.RSSFeed]error{habr.FeedWeekly: errors.New("feed down")}},
 		},
 		{
-			name:         "panic_is_recovered_and_reported",
-			upd:          &fakeFeedUpdater{panicFeed: map[habr.RSSFeed]bool{habr.FeedWeekly: true}},
-			wantReported: true,
+			name: "panic_is_recovered_and_reported",
+			upd:  &fakeFeedUpdater{panicFeed: map[habr.RSSFeed]bool{habr.FeedWeekly: true}},
 		},
 		{
-			name:         "cancellation_is_suppressed",
-			upd:          &fakeFeedUpdater{errFeed: map[habr.RSSFeed]error{habr.FeedWeekly: context.Canceled}},
-			wantReported: false,
+			name: "cancellation_is_reported",
+			upd:  &fakeFeedUpdater{errFeed: map[habr.RSSFeed]error{habr.FeedWeekly: context.Canceled}},
 		},
 	}
 
@@ -91,13 +86,11 @@ func TestUpdateAllFeeds_HandlesEachFeedIndependently(t *testing.T) {
 
 			s := NewService(tc.upd, quietLogger())
 
-			err := s.UpdateAllFeeds(context.Background()) // a panicking feed must not crash the run
-			if tc.wantReported {
-				if err == nil || !strings.Contains(err.Error(), habr.FeedWeekly.Name()) {
-					t.Fatalf("error = %v, want it to mention feed %q", err, habr.FeedWeekly.Name())
-				}
-			} else if err != nil {
-				t.Fatalf("error = %v, want nil (cancellation suppressed)", err)
+			// A panicking feed must not crash the run; the offending feed must
+			// appear in the joined error.
+			err := s.UpdateAllFeeds(context.Background())
+			if err == nil || !strings.Contains(err.Error(), habr.FeedWeekly.Name()) {
+				t.Fatalf("error = %v, want it to mention feed %q", err, habr.FeedWeekly.Name())
 			}
 			// The offending feed never aborts the batch: every feed is still attempted.
 			if got, want := tc.upd.calls, habr.AllFeeds(); !reflect.DeepEqual(got, want) {
@@ -117,7 +110,7 @@ func TestUpdateAllFeeds_StopsOnCancellation(t *testing.T) {
 	cancel() // canceled before the loop starts
 
 	if err := s.UpdateAllFeeds(ctx); err != nil {
-		t.Fatalf("UpdateAllFeeds: want nil (cancellation suppressed), got %v", err)
+		t.Fatalf("UpdateAllFeeds: want nil (no feeds attempted), got %v", err)
 	}
 	if got := upd.calls; len(got) != 0 {
 		t.Fatalf("feeds updated = %v, want none (ctx already canceled)", got)
